@@ -67,7 +67,7 @@ for windowIndex = 1:numWindows
     windowposition=[];
 
     % 右边
-    for x = midpoint:stepSize:size(binaryImage, 2)
+    for x = midpoint:stepSize:size(binaryImage, 2)- windowWidth
         % 定义窗口的水平范围
         windowX = x:min(x + windowWidth - 1, size(binaryImage, 2));
         
