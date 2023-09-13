@@ -9,3 +9,9 @@
 
 ## 0911
 解决了右侧中心线提取失效的问题
+
+## 0912
+完成了二次函数拟合
+
+## 0913
+库文件来自https://linuxtv.org/downloads/zbar/binaries/
