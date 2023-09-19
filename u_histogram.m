@@ -1,6 +1,6 @@
 function colHistograms = u_histogram(inputIMG)
-% 必须输入灰度图
-% inputIMG=im2gray(inputIMG);
+% 转为灰度图处理
+inputIMG=im2gray(inputIMG);
 
 % 初始化一个数组来存储每一行的直方图
 colHistograms = zeros(size(inputIMG, 1), 1);

@@ -1,8 +1,9 @@
 function [Lane_L_X, Lane_R_X, Lane_Y] = u_find_lane(inputIMG, hist)
-%必须输入二值化图像
+%转为二值化图像处理
 
-% binaryImage=imbinarize(inputIMG);
-binaryImage=inputIMG;
+binaryImage=imbinarize(inputIMG);
+%binaryImage=inputIMG;
+
 mid=ceil(size(binaryImage, 2)/2);
 [~, left_x_base] = max(hist(1:mid));
 [~, right_x_base] = max(hist(mid+1:end));

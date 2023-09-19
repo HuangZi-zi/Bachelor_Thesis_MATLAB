@@ -1,7 +1,10 @@
-function [edgeImageBlur] = u_find_edge(inputIMG)
+function [edgeImage] = u_find_edge(inputIMG)
+
+kernel1=strel('square',1);
+kernel5=strel('square',5);
 
 % 定义填充大小（根据需要调整）
-paddingSize = 20; % 这里使用20像素的填充大小
+paddingSize = 80; % 这里使用20像素的填充大小
 
 % 获取原始图像的大小
 [height, width] = size(inputIMG);
@@ -16,18 +19,24 @@ edgeImage = edge(paddedImage, 'Canny');
 % 去除填充部分，保留原始图像部分
 edgeImage = edgeImage(paddingSize + 1:paddingSize + height, paddingSize + 1:paddingSize + width);
 
+%腐蚀
+edgeImage = imerode(edgeImage,kernel1);
 % 膨胀，使边缘更加明显
-kernel=strel('square',5);
-edgeImage = imdilate(edgeImage,kernel);
+edgeImage = imdilate(edgeImage,kernel5);
 
 % 模糊，使滑动窗口与边缘相交出现最值而非多个相同值
-f_blur=fspecial("gaussian");
-edgeImageBlur=imfilter(edgeImage,f_blur);
+edgeImage=double(edgeImage);
+edgeImageBlur=imgaussfilt(edgeImage, 5);
 
 % 可视化结果
 figure;
+subplot(2, 1, 1);
 imshow(edgeImage, 'InitialMagnification', 'fit');
 title('边缘检测结果');
+
+subplot(2, 1, 2);
+imshow(edgeImageBlur);
+title('边缘检测输出');
 
 
 
