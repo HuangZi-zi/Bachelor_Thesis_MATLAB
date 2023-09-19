@@ -15,3 +15,8 @@
 
 ## 0913
 库文件来自https://linuxtv.org/downloads/zbar/binaries/
+
+## 0919
+修改了函数结构，现只需传入原始图像即可
+
+新增使用Hough直线检测的模块，在走廊场景实现了识别
