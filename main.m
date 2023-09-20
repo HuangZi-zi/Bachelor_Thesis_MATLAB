@@ -1,5 +1,5 @@
 clear;
-img=imread("Resource\corridor.jpg");
+img=imread("Resource\road.jpg");
 img=u_segment(img);
 
 
