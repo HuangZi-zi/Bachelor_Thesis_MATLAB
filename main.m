@@ -1,8 +1,6 @@
 clear;
-img=imread("Resource\road.jpg");
+img=imread("Resource\square.jpg");
 img=u_segment(img);
-
-
 
 processed=u_basic_process(img);
 hist=u_histogram(img);
