@@ -2,26 +2,28 @@ function outputIMG = u_basic_process(inputIMG)
 
 
 % 转化为灰度图处理
-% IMGgray=rgb2gray(inputIMG);
-
-
+IMGgray=rgb2gray(inputIMG);
 
 kernel=strel('square',3);
 
 %模糊
-IMGblur = imgaussfilt(inputIMG,4);
-
-% %膨胀
-% IMGdil=imdilate(IMGblur,kernel);
-% 
-% %腐蚀
-% IMGero=imerode(IMGdil,kernel);
-% 
-% outputIMG=gray2rgb(IMGero);
+IMGblur = imgaussfilt(IMGgray,2);
 
 % 自适应二值化
-outputIMG=imbinarize(IMGblur,'adaptive');
+IMGbin=uint8(imbinarize(IMGblur,'adaptive')*255);
 
+% 中值滤波
+IMGfil=medfilt2(IMGbin,[10,10]);
+
+%膨胀
+IMGdil=imdilate(IMGfil,kernel);
+%腐蚀
+IMGero=imerode(IMGdil,kernel);
+
+
+
+
+outputIMG=IMGero;
 
 % % 将图像从空域转换为频域
 % frequencyDomainImage = fft2(double(IMGgray));
@@ -55,11 +57,11 @@ outputIMG=imbinarize(IMGblur,'adaptive');
 % outputIMG=uint8(abs(filteredImage));
 
 figure;
-subplot(1, 2, 1);
+subplot(2, 1, 1);
 imshow(outputIMG);
 title("图像基本处理")
 
-subplot(1, 2, 2);
+subplot(2, 1, 2);
 imshow(inputIMG);
 title('Origin');
 end
