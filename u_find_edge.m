@@ -7,40 +7,42 @@ kernel5=strel('square',5);
 % 获取原始图像的大小
 [height, width, ~] = size(inputIMG);
 
-% Split the image into three color channels (Red, Green, Blue)
-redChannel = inputIMG(:, :, 1);
-greenChannel = inputIMG(:, :, 2);
-blueChannel = inputIMG(:, :, 3);
+% % Split the image into three color channels (Red, Green, Blue)
+% redChannel = inputIMG(:, :, 1);
+% greenChannel = inputIMG(:, :, 2);
+% blueChannel = inputIMG(:, :, 3);
 
 % 使用 Canny 边缘检测算法检测边缘
-% edgeImage = edge(inputIMG, 'Canny', 0.19);
-cannyRed = edge(redChannel, 'Canny');
-cannyGreen = edge(greenChannel, 'Canny');
-cannyBlue = edge(blueChannel, 'Canny');
+edgeImage = edge(inputIMG, 'Canny');
+% cannyRed = edge(redChannel, 'Canny');
+% cannyGreen = edge(greenChannel, 'Canny');
+% cannyBlue = edge(blueChannel, 'Canny');
 
 % Combine the three edge images into a single image
-combinedEdges = uint8(cannyRed+cannyGreen+cannyBlue) * 85;
-combinedEdges = imbinarize(combinedEdges,0.5);
+% combinedEdges = uint8(cannyRed+cannyGreen+cannyBlue) * 85;
+% combinedEdges = imbinarize(combinedEdges,0.5);
 
 % 裁剪边框
 x = 10; % Starting column
 y = 10;  % Starting row
 w = width-2*x; % Width of the ROI
 h = height-2*y; % Height of the ROI
-cropImage = combinedEdges(y:y+h-1, x:x+w-1);
+% cropImage = combinedEdges(y:y+h-1, x:x+w-1);
+cropImage = edgeImage(y:y+h-1, x:x+w-1);
 
 % 重新填充
 paddedImage = zeros(height, width);
 paddedImage(x + 1:x + h, y + 1:y + w) = cropImage;
 
 edgeImage=paddedImage;
-% 开运算
-edgeImage = imerode(edgeImage,kernel1);
-edgeImage = imdilate(edgeImage,kernel1);
 
-% 闭运算
-edgeImage = imdilate(edgeImage,kernel1);
-edgeImage = imerode(edgeImage,kernel1);
+% % 开运算
+% edgeImage = imerode(edgeImage,kernel1);
+% edgeImage = imdilate(edgeImage,kernel1);
+% 
+% % 闭运算
+% edgeImage = imdilate(edgeImage,kernel1);
+% edgeImage = imerode(edgeImage,kernel1);
 
 
 % % 模糊，使滑动窗口与边缘相交出现最值而非多个相同值
@@ -59,21 +61,21 @@ edgeImage = imerode(edgeImage,kernel1);
 
 % 可视化结果
 figure;
-subplot(2,2,1);
-imshow(cannyRed);
-title('Red');
+% subplot(2,2,1);
+% imshow(cannyRed);
+% title('Red');
+% 
+% subplot(2,2,2);
+% imshow(cannyGreen);
+% title('Green');
+% 
+% subplot(2,2,3);
+% imshow(cannyBlue);
+% title('Blue');
 
-subplot(2,2,2);
-imshow(cannyGreen);
-title('Green');
-
-subplot(2,2,3);
-imshow(cannyBlue);
-title('Blue');
-
-subplot(2,2,4);
+% subplot(2,2,4);
 imshow(edgeImage);
-title('Final');
+title('Edges');
 % figure;
 % subplot(2, 1, 1);
 % imshow(edgeImage, 'InitialMagnification', 'fit');

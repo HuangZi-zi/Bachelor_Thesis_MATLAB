@@ -9,16 +9,16 @@ IMGgray=rgb2gray(inputIMG);
 IMGblur = imgaussfilt(IMGgray,2);
 
 %膨胀
-IMGdil=imdilate(IMGblur,strel('square',41));
+IMGdil=imdilate(IMGblur,strel('square',21));
 %腐蚀
-IMGero=imerode(IMGdil,strel('square',5));
+IMGero=imerode(IMGdil,strel('square',9));
 
 
 % % 自适应二值化
 % IMGbin=uint8(imbinarize(IMGero,'adaptive')*255);
-IMGbin=uint8(IMGero);
+IMGgray=uint8(IMGero);
 % 中值滤波
-IMGfil=medfilt2(IMGbin,[15,15]);
+IMGfil=medfilt2(IMGgray,[15,15]);
 
 
 
@@ -68,5 +68,5 @@ title("图像基本处理")
 
 subplot(2, 1, 2);
 imshow(inputIMG);
-title('Origin');
+title('原始图像');
 end

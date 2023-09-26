@@ -77,7 +77,7 @@ end
                 leftLaneLines = [leftLaneLines; mergedLines(i)];
             end
         else
-            if mergedLines(i).a>0 && mergedLines(i).a < Inf
+            if mergedLines(i).a>0
                 rightLaneLines = [rightLaneLines; mergedLines(i)];
             end
         end
@@ -126,7 +126,7 @@ end
         resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'cyan', 'LineWidth', 5);
         figure;
         imshow(resultImage);
-        fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
+        fprintf("%f\t%f",leftLaneLines(sorted_L(1)).a,)
         title('直线检测结果');
     end
     
