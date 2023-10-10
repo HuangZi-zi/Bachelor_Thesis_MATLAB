@@ -1,4 +1,4 @@
-function [] = u_fit(Lane_L_X, Lane_R_X, Lane_Y, inputIMG)
+function output = u_fit(Lane_L_X, Lane_R_X, Lane_Y, inputIMG)
 
 % x_L=a_L * x.^2 + b_L * x + c_L;
 % x_R=a_R * x.^2 + b_R * x + c_R;
@@ -17,15 +17,24 @@ b_R = coefficients_R(2);
 c_R = coefficients_R(3);
 
 % 创建拟合的二次函数
-Y=linspace(0,size(inputIMG,2));
+Y=linspace(0,size(inputIMG,1));
 X_L=a_L * Y.^2 + b_L * Y + c_L;
 X_R=a_R * Y.^2 + b_R * Y + c_R;
 
-figure;
+lastlines=[399,400,401];
+X_L_last=a_L * lastlines.^2 + b_L * lastlines + c_L;
+X_R_last=a_R * lastlines.^2 + b_R * lastlines + c_R;
+output=550-round((sum(X_R_last)+sum(X_L_last))/6);
+
+%figure;
 imshow(inputIMG);
 hold on;
+scatter(Lane_L_X, Lane_Y,'red','filled');
+scatter(Lane_R_X, Lane_Y,'red','filled');
 title('二次函数拟合');
 plot(X_L, Y, 'r', 'LineWidth', 2, 'DisplayName', 'Left Lane'); % 绘制拟合曲线
 plot(X_R, Y, 'r', 'LineWidth', 2, 'DisplayName', 'Right Lane');
+scatter(550-output, 390,'green','filled');
+hold off;
 
 end
