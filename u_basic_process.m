@@ -61,12 +61,12 @@ outputIMG=IMGdil;
 
 % outputIMG=uint8(abs(filteredImage));
 
-figure;
-subplot(2, 1, 1);
-imshow(outputIMG);
-title("图像基本处理")
-
-subplot(2, 1, 2);
-imshow(inputIMG);
-title('原始图像');
+% figure;
+% subplot(2, 1, 1);
+% imshow(outputIMG);
+% title("图像基本处理")
+% 
+% subplot(2, 1, 2);
+% imshow(inputIMG);
+% title('原始图像');
 end

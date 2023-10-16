@@ -60,7 +60,7 @@ edgeImage=paddedImage;
 % title('边缘检测输出');
 
 % 可视化结果
-figure;
+% figure;
 % subplot(2,2,1);
 % imshow(cannyRed);
 % title('Red');
@@ -74,8 +74,8 @@ figure;
 % title('Blue');
 
 % subplot(2,2,4);
-imshow(edgeImage);
-title('Edges');
+% imshow(edgeImage);
+% title('Edges');
 % figure;
 % subplot(2, 1, 1);
 % imshow(edgeImage, 'InitialMagnification', 'fit');
