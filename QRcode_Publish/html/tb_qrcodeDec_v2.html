@@ -1,0 +1,627 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>tb_qrcodeDec_v2</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-04-01"><meta name="DC.source" content="tb_qrcodeDec_v2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">QR Code decoder</a></li><li><a href="#2">&#30011;&#20687;&#12487;&#12540;&#12479;&#35501;&#12415;&#36796;&#12415;</a></li><li><a href="#3">&#30011;&#20687;&#12487;&#12540;&#12479;&#12434;2&#20516;&#21270;</a></li><li><a href="#4">QR&#12467;&#12540;&#12489;&#12398;&#20301;&#32622;&#26908;&#20986;&#29992;&#12497;&#12479;&#12531;(&#12501;&#12449;&#12452;&#12531;&#12480;)&#26908;&#20986;</a></li><li><a href="#5">&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20013;&#24515;3&#24231;&#27161;&#12434;&#25277;&#20986;</a></li><li><a href="#6">&#27498;&#12415;&#35036;&#27491;&#29992;&#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#26908;&#20986;</a></li><li><a href="#7">&#12501;&#12449;&#12452;&#12531;&#12480;&amp;&#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#12398;&#20301;&#32622;&#12434;&#21487;&#35222;&#21270;</a></li><li><a href="#8">3&#12388;&#12398;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#38306;&#20418;&#12434;&#31639;&#20986;&#12375;&#12289;&#12393;&#12398;&#12424;&#12358;&#12394;&#26041;&#21521;&#12363;&#12425;QR&#12467;&#12540;&#12489;&#12364;&#25774;&#24433;&#12373;&#12428;&#12383;&#12398;&#12363;&#12434;&#25226;&#25569;&#12375;&#12414;&#12377;</a></li><li><a href="#9">&#27498;&#12435;&#12391;&#12356;&#12427;QR&#12467;&#12540;&#12489;&#12434;&#24190;&#20309;&#23398;&#30340;&#22793;&#25563;&#12395;&#12424;&#12426;&#35036;&#27491;&#12375;&#12414;&#12377;</a></li><li><a href="#10">&#24190;&#20309;&#23398;&#22793;&#25563;&#29992;&#34892;&#21015;&#12434;&#31639;&#20986;</a></li><li><a href="#11">&#24190;&#20309;&#23398;&#30340;&#22793;&#25563;&#24460;&#12289;&#32080;&#26524;&#12434;&#34920;&#31034;</a></li><li><a href="#12">&#32048;&#12363;&#12356;&#12494;&#12452;&#12474;&#12434;&#38500;&#21435;&#12375;&#12414;&#12377;</a></li><li><a href="#13">&#27498;&#12415;&#35036;&#27491;&#12364;&#23436;&#20102;&#12375;&#12383;&#12398;&#12391;&#12289;&#25913;&#12417;&#12390;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#12434;&#27714;&#12417;&#12414;&#12377;</a></li><li><a href="#14">3&#24231;&#27161;&#12434;&#25277;&#20986;</a></li><li><a href="#15">3&#12388;&#12398;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#38306;&#20418;&#12434;&#31639;&#20986;&#12375;&#12414;&#12377;</a></li><li><a href="#16">&#24231;&#27161;&#20301;&#32622;&#12395;&#24540;&#12376;&#12390;&#30011;&#20687;&#22238;&#36578;</a></li><li><a href="#17">&#26412;&#20363;&#38988;&#12391;&#12399;25x25&#12475;&#12523;&#12398;&#12496;&#12540;&#12472;&#12519;&#12531;2 QR&#12467;&#12540;&#12489;&#12434;&#29992;&#12356;&#12390;&#12356;&#12414;&#12377;&#12364;&#12289;&#30011;&#20687;&#12395;&#12362;&#12369;&#12427;1&#12475;&#12523;&#12354;&#12383;&#12426;&#12398;&#22823;&#12365;&#12373;&#12434;&#27714;&#12417;&#12414;&#12377;</a></li><li><a href="#18">&#27425;&#12395;&#12289;&#21508;&#12475;&#12523;&#12398;&#20013;&#24515;&#24231;&#27161;&#12434;&#34920;&#12377;&#37197;&#21015;&#12434;&#20316;&#25104;&#12375;&#12414;&#12377;</a></li><li><a href="#19">&#27714;&#12417;&#12383;&#20013;&#24515;&#24231;&#27161;&#24773;&#22577;&#12434;&#22522;&#12395;&#12289;&#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12434;&#35501;&#12415;&#21462;&#12426;&#12414;&#12377;</a></li><li><a href="#20">&#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12398;&#24489;&#21495;</a></li><li><a href="#21">&#27425;&#12395;&#12289;&#12487;&#12540;&#12479;&#12434;&#35501;&#12415;&#21462;&#12427;&#38918;&#30058;&#12434;&#31034;&#12377;&#12452;&#12531;&#12487;&#12483;&#12463;&#12473;&#12486;&#12540;&#12502;&#12523;&#12434;&#20316;&#25104;&#12375;&#12414;&#12377;</a></li><li><a href="#22">&#20316;&#25104;&#12375;&#12383;&#12452;&#12531;&#12487;&#12483;&#12463;&#12473;&#12395;&#24467;&#12356;&#12289;&#12487;&#12540;&#12479;&#12434;&#35501;&#12415;&#21462;&#12426;&#12414;&#12377;</a></li><li><a href="#23">&#35501;&#12415;&#20986;&#12375;&#12383;&#12499;&#12483;&#12488;&#21015;&#12434;&#24489;&#21495;&#12375;&#12390;&#12415;&#12414;&#12377;</a></li><li><a href="#24">&#32080;&#26524;&#25407;&#20837;(&#35492;&#12426;&#35330;&#27491;&#12354;&#12426;)</a></li><li><a href="#25">&#35492;&#12426;&#35330;&#27491;&#31526;&#21495;&#12434;&#21033;&#29992;&#12375;&#12289;&#35492;&#12387;&#12383;&#25991;&#23383;&#21015;&#12434;&#35330;&#27491;&#12375;&#12414;&#12377;</a></li><li><a href="#27">&#32080;&#26524;&#25407;&#20837;(&#35492;&#12426;&#35330;&#27491;&#12354;&#12426;)</a></li></ul></div><h2 id="1">QR Code decoder</h2><p>- This example shows how to decode QR Code encoded in version2 format. *QR Code is a registered trademark of DENSO WAVE INCORPORATED</p><pre class="codeinput"><span class="comment">% &#12496;&#12540;&#12472;&#12519;&#12531;2&#12289;&#35492;&#12426;&#35330;&#27491;&#12524;&#12505;&#12523;L&#12398;QR&#12467;&#12540;&#12489;&#12434;&#24489;&#21495;&#12377;&#12427;&#27969;&#12428;&#12434;&#30906;&#35469;&#12377;&#12427;&#12383;&#12417;&#12398;</span>
+<span class="comment">% &#12469;&#12531;&#12503;&#12523;&#12467;&#12540;&#12489;&#12391;&#12377;</span>
+<span class="comment">% *QR&#12467;&#12540;&#12489;&#12399;(&#26666;)&#12487;&#12531;&#12477;&#12540;&#12454;&#12455;&#12540;&#12502;&#12398;&#30331;&#37682;&#21830;&#27161;&#12391;&#12377;</span>
+clear <span class="string">all</span>, close <span class="string">all</span>, clc;
+</pre><h2 id="2">&#30011;&#20687;&#12487;&#12540;&#12479;&#35501;&#12415;&#36796;&#12415;</h2><p>- Read Image</p><pre class="codeinput"><span class="comment">% &#20104;&#12417;&#20316;&#25104;&#12375;&#12390;&#12362;&#12356;&#12383;&#30011;&#20687;&#12487;&#12540;&#12479;&#12434;&#35501;&#12415;&#36796;&#12415;&#12414;&#12377;&#12290;webCam&#12391;&#26012;&#12417;&#12363;&#12425;&#25774;&#24433;&#12375;&#12390;&#12362;&#12426;&#12289;</span>
+<span class="comment">% &#27498;&#12435;&#12391;&#12356;&#12414;&#12377;&#12290;&#12414;&#12383;&#12289;QR&#12467;&#12540;&#12489;&#19978;&#12395;&#12399;MathWorks&#12398;&#12525;&#12468;&#12364;&#25551;&#12363;&#12428;&#12383;&#32025;&#12364;&#32622;&#12363;&#12428;&#12289;</span>
+<span class="comment">% &#12467;&#12540;&#12489;&#12398;&#19968;&#37096;&#12364;&#38560;&#12428;&#12390;&#12356;&#12427;&#29366;&#24907;&#12391;&#12377;</span>
+img = imread(<span class="string">'mwprinciple_webcam.png'</span>);
+<span class="comment">%img = imrotate(img, 180);</span>
+imshow(img)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_01.png" alt=""> <h2 id="3">&#30011;&#20687;&#12487;&#12540;&#12479;&#12434;2&#20516;&#21270;</h2><p>- Convert RGB to grayscale image and binarize</p><pre class="codeinput">bw = imbinarize(rgb2gray(img));
+imshow(bw)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_02.png" alt=""> <h2 id="4">QR&#12467;&#12540;&#12489;&#12398;&#20301;&#32622;&#26908;&#20986;&#29992;&#12497;&#12479;&#12531;(&#12501;&#12449;&#12452;&#12531;&#12480;)&#26908;&#20986;</h2><p>- Find where the finder patterns are</p><pre class="codeinput">[Centroid, bw2, flag, width, bbox] = detectFinder(bw);
+</pre><h2 id="5">&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20013;&#24515;3&#24231;&#27161;&#12434;&#25277;&#20986;</h2><p>- Extract XY coordinates of center of finder patterns</p><pre class="codeinput">markers = Centroid(logical(flag),:);
+</pre><h2 id="6">&#27498;&#12415;&#35036;&#27491;&#29992;&#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#26908;&#20986;</h2><p>- Find where the alignment pattern is</p><pre class="codeinput">bwa = imclearborder(bw);
+bwa = bwpropfilt(bwa, <span class="string">'EulerNumber'</span>, [0, 0]);
+bwa = imfill(bwa, <span class="string">'holes'</span>);
+stats = regionprops(bwa, <span class="string">'Area'</span>, <span class="string">'Centroid'</span>);
+area = [stats.Area];
+[mv, i] = min(area);
+alp = stats(i).Centroid;
+</pre><h2 id="7">&#12501;&#12449;&#12452;&#12531;&#12480;&amp;&#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#12398;&#20301;&#32622;&#12434;&#21487;&#35222;&#21270;</h2><p>- Visualize finder and alignment patterns</p><pre class="codeinput"><span class="comment">% &#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#21487;&#35222;&#21270;&#29992;&#12510;&#12473;&#12463;</span>
+bwf = imfill(bw2, <span class="string">'holes'</span>);
+
+<span class="comment">% &#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#12398;&#20301;&#32622;&#21487;&#35222;&#21270;&#29992;&#12510;&#12473;&#12463;</span>
+bwl = bwlabel(bwa);
+bwl = bwl == i;
+bwlf = bwf | bwl;
+mask3 = repmat(bwlf, [1 1 3]);
+imgf = img;
+<span class="comment">% &#12501;&#12449;&#12452;&#12531;&#12480;&amp;&#12450;&#12521;&#12452;&#12513;&#12531;&#12488;&#12497;&#12479;&#12540;&#12531;&#20197;&#22806;&#12398;&#36637;&#24230;&#20516;&#12434;&#33853;&#12392;&#12377;</span>
+imgf(~mask3) = imgf(~mask3) * 0.2;
+imshow(imgf)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_03.png" alt=""> <h2 id="8">3&#12388;&#12398;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#38306;&#20418;&#12434;&#31639;&#20986;&#12375;&#12289;&#12393;&#12398;&#12424;&#12358;&#12394;&#26041;&#21521;&#12363;&#12425;QR&#12467;&#12540;&#12489;&#12364;&#25774;&#24433;&#12373;&#12428;&#12383;&#12398;&#12363;&#12434;&#25226;&#25569;&#12375;&#12414;&#12377;</h2><p>- Understand positional relation of each patterns</p><pre class="codeinput">[idxC, idxX, idxY] = finderPos(markers);
+<span class="comment">% 3&#12467;&#12540;&#12490;&#12540;&#12395;&#37197;&#32622;&#12373;&#12428;&#12427;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20013;&#12391;&#12289;&#24038;&#19978;&#37096;&#12395;&#37197;&#32622;&#12373;&#12428;&#12427;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#12395;</span>
+<span class="comment">% &#36196;&#33394;&#12510;&#12540;&#12459;&#12434;&#37197;&#32622;</span>
+imgf = insertShape(imgf, <span class="string">'FilledCircle'</span>, [markers(idxC, :) 10], <span class="string">'Color'</span>, <span class="string">'red'</span>);
+imshow(imgf)
+<span class="comment">% X&#36600;(&#27700;&#24179;)&#26041;&#21521;&#12395;&#23550;&#12377;&#12427;&#35282;&#24230;&#12364;&#26368;&#23567;&#12392;&#12394;&#12427;&#36794;&#12434;&#25104;&#12377;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#12395;</span>
+<span class="comment">% &#38738;&#33394;&#12510;&#12540;&#12459;&#12434;&#37197;&#32622;</span>
+imgf = insertShape(imgf, <span class="string">'FilledCircle'</span>, [markers(idxX, :) 10], <span class="string">'Color'</span>, <span class="string">'blue'</span>);
+imshow(imgf)
+<span class="comment">% Y&#36600;(&#22402;&#30452;)&#26041;&#21521;&#12395;&#23550;&#12377;&#12427;&#35282;&#24230;&#12364;&#26368;&#23567;&#12392;&#12394;&#12427;&#36794;&#12434;&#25104;&#12377;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#12395;</span>
+<span class="comment">% &#40644;&#33394;&#12510;&#12540;&#12459;&#12434;&#37197;&#32622;</span>
+imgf = insertShape(imgf, <span class="string">'FilledCircle'</span>, [markers(idxY, :) 10], <span class="string">'Color'</span>, <span class="string">'yellow'</span>);
+imshow(imgf)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_04.png" alt=""> <h2 id="9">&#27498;&#12435;&#12391;&#12356;&#12427;QR&#12467;&#12540;&#12489;&#12434;&#24190;&#20309;&#23398;&#30340;&#22793;&#25563;&#12395;&#12424;&#12426;&#35036;&#27491;&#12375;&#12414;&#12377;</h2><p>- Create x and y coordinates of control points for geometric transformation</p><pre class="codeinput">[Cref, Xref, Yref, Aref] = createControlPts(idxC, idxX, idxY, width, width, markers);
+
+post = [Cref; Xref; Yref; Aref];
+org = [markers(idxC, :); markers(idxX, :); markers(idxY, :); alp];
+</pre><pre class="codeoutput">
+Xref =
+
+  127.7714   39.3143
+
+</pre><h2 id="10">&#24190;&#20309;&#23398;&#22793;&#25563;&#29992;&#34892;&#21015;&#12434;&#31639;&#20986;</h2><p>- Fit geometric transformation to control point pairs</p><pre class="codeinput">T = fitgeotrans(org, post,<span class="string">'projective'</span>); <span class="comment">% projective2d &#12463;&#12521;&#12473;&#65288;&#22793;&#25563;&#34892;&#21015;&#12392;&#27425;&#20803;&#65289;</span>
+T.T             <span class="comment">% &#29983;&#25104;&#12373;&#12428;&#12383;&#34892;&#21015;&#12398;&#30906;&#35469;</span>
+</pre><pre class="codeoutput">
+ans =
+
+    0.6597   -0.0795    0.0004
+    0.4998    1.1124    0.0025
+ -183.1617  -48.5932    1.0000
+
+</pre><h2 id="11">&#24190;&#20309;&#23398;&#30340;&#22793;&#25563;&#24460;&#12289;&#32080;&#26524;&#12434;&#34920;&#31034;</h2><p>- Apply geometric transformation to image</p><pre class="codeinput">bwt = imwarp(bw, T);
+imshow(bwt); <span class="comment">% &#12487;&#12501;&#12457;&#12523;&#12488;&#12399;&#32218;&#24418;&#35036;&#38291;</span>
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_05.png" alt=""> <h2 id="12">&#32048;&#12363;&#12356;&#12494;&#12452;&#12474;&#12434;&#38500;&#21435;&#12375;&#12414;&#12377;</h2><p>- Remove noises</p><pre class="codeinput">bwti = ~bwt;
+<span class="comment">%Iinv = imclose(Iinv, strel(ones(2)));</span>
+bwti = imopen(bwti, strel(ones(3)));
+bwti = imclearborder(bwti);
+bwt = ~bwti;
+imshow(bwt)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_06.png" alt=""> <h2 id="13">&#27498;&#12415;&#35036;&#27491;&#12364;&#23436;&#20102;&#12375;&#12383;&#12398;&#12391;&#12289;&#25913;&#12417;&#12390;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#12434;&#27714;&#12417;&#12414;&#12377;</h2><p>- Find where the finder patterns are for transposed image</p><pre class="codeinput">[Centroid, bw, flag, width, ~] = detectFinder(bwt);
+</pre><h2 id="14">3&#24231;&#27161;&#12434;&#25277;&#20986;</h2><p>- Extract XY coordinates of center of finder patterns</p><pre class="codeinput">markers = Centroid(logical(flag),:);
+</pre><h2 id="15">3&#12388;&#12398;&#12501;&#12449;&#12452;&#12531;&#12480;&#12398;&#20301;&#32622;&#38306;&#20418;&#12434;&#31639;&#20986;&#12375;&#12414;&#12377;</h2><p>- Understand positional relation of each patterns</p><pre class="codeinput">[idxC, idxX, idxY] = finderPos(markers);
+</pre><h2 id="16">&#24231;&#27161;&#20301;&#32622;&#12395;&#24540;&#12376;&#12390;&#30011;&#20687;&#22238;&#36578;</h2><p>- Rotate image and coordinates to locate the corner of finder patterns to top left</p><pre class="codeinput">[idxC, idxX, idxY, bwt] = rotPosition(idxC, idxX, idxY, bwt, markers);
+imshow(bwt)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_07.png" alt=""> <h2 id="17">&#26412;&#20363;&#38988;&#12391;&#12399;25x25&#12475;&#12523;&#12398;&#12496;&#12540;&#12472;&#12519;&#12531;2 QR&#12467;&#12540;&#12489;&#12434;&#29992;&#12356;&#12390;&#12356;&#12414;&#12377;&#12364;&#12289;&#30011;&#20687;&#12395;&#12362;&#12369;&#12427;1&#12475;&#12523;&#12354;&#12383;&#12426;&#12398;&#22823;&#12365;&#12373;&#12434;&#27714;&#12417;&#12414;&#12377;</h2><p>- Calculate the size of cell for version2 QR Code in an image</p><pre class="codeinput"><span class="comment">% 1&#12475;&#12523;&#12398;&#39640;&#12373;&#12434;&#27770;&#23450;</span>
+<span class="comment">% &#12501;&#12449;&#12452;&#12531;&#12480;&#12510;&#12540;&#12459;&#12540;&#38291;&#12398;&#36317;&#38626;&#12399;18&#12475;&#12523;&#12391;&#12354;&#12427;&#12398;&#12391;&#12289;regionprops&#12391;&#27714;&#12417;&#12383;&#24231;&#27161;&#12398;</span>
+<span class="comment">% &#36317;&#38626;&#12434;18&#12391;&#21106;&#12426;&#12289;1&#12475;&#12523;&#38291;&#12398;&#39640;&#12373;&#12434;&#27714;&#12417;&#12414;&#12377;</span>
+<span class="comment">%xy = round(markers(idxC,:));</span>
+xy = round(idxC);
+<span class="comment">%height = (markers(idxY, 2) - xy(2)) / 18;</span>
+height = (idxY(1, 2) - xy(2)) / 18;
+<span class="comment">% &#21516;&#27096;&#12395;&#12375;&#12390;1&#12475;&#12523;&#12398;&#24133;&#12434;&#27714;&#12417;&#12414;&#12377;</span>
+width = (idxX(1, 1) - xy(1)) / 18;
+
+<span class="comment">% QR&#12467;&#12540;&#12489;&#12395;&#22475;&#12417;&#36796;&#12414;&#12428;&#12390;&#12356;&#12427;&#12479;&#12452;&#12511;&#12531;&#12464;&#12497;&#12479;&#12540;&#12531;&#12434;&#21033;&#29992;&#12375;&#12383;&#26041;&#12364;&#12424;&#12426;&#27491;&#30906;&#12391;&#12377;&#12364;&#12289;</span>
+<span class="comment">% &#31777;&#30053;&#21270;&#12398;&#12383;&#12417;&#12395;&#26412;&#20363;&#38988;&#12391;&#12399;&#21106;&#24859;&#12375;&#12414;&#12377;&#12290;</span>
+</pre><h2 id="18">&#27425;&#12395;&#12289;&#21508;&#12475;&#12523;&#12398;&#20013;&#24515;&#24231;&#27161;&#12434;&#34920;&#12377;&#37197;&#21015;&#12434;&#20316;&#25104;&#12375;&#12414;&#12377;</h2><p>- Create array that represents x and y coordinates of each cells</p><pre class="codeinput"><span class="comment">%QR&#12467;&#12540;&#12489; : &#12496;&#12540;&#12472;&#12519;&#12531;2&#12399;&#32294;&#27178;25&#12475;&#12523;</span>
+xref = xy(1) - width*3;
+yref = xy(2) - height*3;
+xtable = (1:25) * width - width;
+xtable = round(xtable + xref);
+ytable = (1:25) * height - height;
+ytable = round(ytable + yref);
+</pre><h2 id="19">&#27714;&#12417;&#12383;&#20013;&#24515;&#24231;&#27161;&#24773;&#22577;&#12434;&#22522;&#12395;&#12289;&#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12434;&#35501;&#12415;&#21462;&#12426;&#12414;&#12377;</h2><p>- Read format information to understand error correction level and mask pattern used in QR Code</p><pre class="codeinput"><span class="comment">% &#12487;&#12467;&#12540;&#12489;&#12434;&#34892;&#12358;&#12383;&#12417;&#12395;&#24517;&#35201;&#12394;&#35492;&#12426;&#35330;&#27491;&#12524;&#12505;&#12523;&#12420;&#12289;&#26045;&#12373;&#12428;&#12383;&#12510;&#12473;&#12463;&#12497;&#12479;&#12531;&#12398;&#24773;&#22577;&#12364;</span>
+<span class="comment">% &#35352;&#36848;&#12373;&#12428;&#12390;&#12356;&#12414;&#12377;&#12290;</span>
+bwo = ~bwt;
+fmt1 = bwo(ytable(9), xtable([1:6,8]));
+fmt2 = bwo(ytable([1:6, 8:9]), xtable(9));
+
+<span class="comment">%fmt2 = bwo(xtable([1:6,8:9]), ytable(9));</span>
+<span class="comment">%fmt1 = bwo(xtable(9), ytable([1:6, 8]));</span>
+
+fdata = [fmt1, fliplr(fmt2')];
+</pre><h2 id="20">&#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12398;&#24489;&#21495;</h2><p>- Decode format information using BCH decoder</p><pre class="codeinput"><span class="comment">% &#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12395;&#12399;&#12510;&#12473;&#12463;&#12497;&#12479;&#12531;&#12364;&#26045;&#12373;&#12428;&#12390;&#12356;&#12427;&#12383;&#12417;&#12289;xor&#12434;&#12392;&#12426;&#12414;&#12377;&#12290;</span>
+bitp = logical([1 0 1 0 1 0 0 0 0 0 1 0 0 1 0]);
+fdata = xor(fdata, bitp);
+<span class="comment">% BCH&#31526;&#21495;&#12395;&#12424;&#12426;&#31526;&#21495;&#21270;&#12373;&#12428;&#12390;&#12356;&#12427;&#12398;&#12391;&#12289;&#24489;&#21495;&#12375;&#12414;&#12377;</span>
+finfo = bchdec(gf(fdata), 15, 5);
+minfo = finfo(3:5); <span class="comment">%&#12510;&#12473;&#12463;&#12497;&#12479;&#12531;&#24773;&#22577;</span>
+</pre><h2 id="21">&#27425;&#12395;&#12289;&#12487;&#12540;&#12479;&#12434;&#35501;&#12415;&#21462;&#12427;&#38918;&#30058;&#12434;&#31034;&#12377;&#12452;&#12531;&#12487;&#12483;&#12463;&#12473;&#12486;&#12540;&#12502;&#12523;&#12434;&#20316;&#25104;&#12375;&#12414;&#12377;</h2><p>- Create index table that represents how to read data bits and error correction bits</p><pre class="codeinput"><span class="comment">% &#35501;&#12415;&#20986;&#12375;&#12399;&#21491;&#19979;&#35282;&#12363;&#12425;&#38918;&#12395;&#12289;&#38563;&#12426;&#21512;&#12358;&#21015;&#12392;&#20132;&#20114;&#12395;&#35501;&#12415;&#20986;&#12375;&#12390;&#12356;&#12365;&#12289;</span>
+<span class="comment">% &#12467;&#12540;&#12489;&#12398;&#19978;&#31471;&#12418;&#12375;&#12367;&#12399;&#19979;&#31471;&#12395;&#21040;&#36948;&#12375;&#12383;&#22580;&#21512;&#12399;&#35501;&#12415;&#20986;&#12377;&#26041;&#21521;&#12434;&#36578;&#25563;&#12375;&#12414;&#12377;&#12290;</span>
+
+<span class="comment">% &#22522;&#28310;&#12486;&#12540;&#12502;&#12523;&#20316;&#25104;</span>
+xidx = 0:24;
+xidx = repmat(xidx, [25, 1]);
+yidx = 0:24;
+yidx = repmat(yidx', [1, 25]);
+idxtbl = cat(3, xidx, yidx);
+<span class="comment">% &#12487;&#12540;&#12479;&#35501;&#12415;&#21462;&#12426;&#31623;&#25152;&#12452;&#12531;&#12487;&#12483;&#12463;&#12473;&#31639;&#20986;</span>
+[xidx yidx reftable] = readtable(28+16);
+<span class="comment">% &#35501;&#12415;&#20986;&#12375;&#26041;&#12364;&#29305;&#27530;&#12394;&#12398;&#12391;&#12289;&#12487;&#12540;&#12479;&#12392;&#35330;&#27491;&#31526;&#21495;&#12364;&#26684;&#32013;&#12373;&#12428;&#12390;&#12356;&#12427;&#38936;&#22495;&#12434;</span>
+<span class="comment">% &#21487;&#35222;&#21270;&#12375;&#12390;&#30906;&#35469;&#12375;&#12414;&#12377;&#12290;</span>
+reftable = label2rgb(reftable);
+figure, imshow(reftable)
+title(<span class="string">'QR code layout : Version2, Error correction level = L'</span>)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_08.png" alt=""> <h2 id="22">&#20316;&#25104;&#12375;&#12383;&#12452;&#12531;&#12487;&#12483;&#12463;&#12473;&#12395;&#24467;&#12356;&#12289;&#12487;&#12540;&#12479;&#12434;&#35501;&#12415;&#21462;&#12426;&#12414;&#12377;</h2><p>- Read data and error correction bits according to the table</p><pre class="codeinput">data = bwo(ytable(yidx), xtable(xidx));
+<span class="comment">%data = bwo(xtable(xidx), ytable(yidx));</span>
+
+data = diag(data);
+mx = idxtbl(:,:,1);
+mx = mx(yidx, xidx);
+mx = diag(mx);
+my = idxtbl(:,:,2);
+my = my(yidx, xidx);
+my = diag(my);
+
+<span class="comment">% &#12501;&#12457;&#12540;&#12510;&#12483;&#12488;&#24773;&#22577;&#12395;&#35352;&#36617;&#12373;&#12428;&#12383;&#12510;&#12473;&#12463;&#12497;&#12479;&#12531;&#12398;&#24773;&#22577;&#12434;&#22522;&#12395;&#12289;</span>
+<span class="comment">% &#35442;&#24403;&#31623;&#25152;&#12398;&#12487;&#12540;&#12479;&#12434;&#21453;&#36578;&#12375;&#12414;&#12377;&#12290;</span>
+mask = cat(3, mx, my);
+invidx =  maskGen(mask, minfo);
+data(invidx) = ~data(invidx);
+</pre><h2 id="23">&#35501;&#12415;&#20986;&#12375;&#12383;&#12499;&#12483;&#12488;&#21015;&#12434;&#24489;&#21495;&#12375;&#12390;&#12415;&#12414;&#12377;</h2><p>- Try to decode data without error correction</p><pre class="codeinput"><span class="comment">% version2, &#35492;&#12426;&#35330;&#27491;&#12524;&#12505;&#12523;L&#12398;&#22580;&#21512;&#12289;&#25991;&#23383;&#25968;&#12399;&#26368;&#22823;28&#12289;</span>
+<span class="comment">% &#35492;&#12426;&#35330;&#27491;&#31526;&#21495;&#12399;16&#12392;&#12394;&#12426;&#12414;&#12377;&#12290;</span>
+
+<span class="comment">% &#12487;&#12540;&#12479;&#12398;&#20808;&#38957;4bit&#12399;QR&#12467;&#12540;&#12489;&#12398;&#12514;&#12540;&#12489;&#25351;&#31034;&#23376;&#12395;&#12394;&#12387;&#12390;&#12356;&#12414;&#12377;&#12290;</span>
+<span class="comment">% &#20197;&#38477;&#12398;&#12487;&#12467;&#12540;&#12489;&#12395;&#24517;&#35201;&#12394;&#12383;&#12417;&#12289;&#12414;&#12378;&#12514;&#12540;&#12489;&#12434;&#30906;&#35469;&#12375;&#12414;&#12377;&#12290;</span>
+<span class="comment">% 1 : &#25968;&#23383;&#12514;&#12540;&#12489;</span>
+<span class="comment">% 2 : &#33521;&#25968;&#23383;&#12514;&#12540;&#12489;</span>
+<span class="comment">% 3 : 8bit&#12514;&#12540;&#12489;</span>
+<span class="comment">% 4 : &#28450;&#23383;&#12514;&#12540;&#12489;</span>
+data = num2str(data)';
+mode = data(1:4);
+mode = bin2dec(mode);
+
+<span class="comment">% &#12371;&#12371;&#12391;&#12399;&#12289;8bit&#12514;&#12540;&#12489;&#12398;&#12415;&#21462;&#12426;&#19978;&#12370;&#12414;&#12377;&#12290;</span>
+<span class="keyword">if</span> mode == 4 <span class="comment">% 8bit&#12514;&#12540;&#12489;</span>
+    <span class="comment">%&#25991;&#23383;&#25968;&#25351;&#31034;&#23376;&#12398;&#24489;&#21495;</span>
+    length = data(5:12);
+    length = bin2dec(length);
+    D = data(13:end);
+    text = cell(1, length);
+    <span class="keyword">for</span> i = 1:length
+        tmp = D((i-1)*8+1:i*8);
+        text{1, i} = char(bin2dec(tmp));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% &#24489;&#21495;&#12375;&#12383;&#32080;&#26524;&#12434;&#34920;&#31034;</span>
+text = strjoin(text)
+
+<span class="comment">% &#20309;&#12425;&#12363;&#12398;&#25991;&#23383;&#21015;&#12364;&#30906;&#35469;&#12391;&#12365;&#12414;&#12375;&#12383;&#12364;&#12289;QR&#12467;&#12540;&#12489;&#19978;&#12395;&#32622;&#12363;&#12428;&#12383;&#32025;&#12395;&#12424;&#12387;&#12390;</span>
+<span class="comment">% &#19968;&#37096;&#12364;&#38560;&#12428;&#12390;&#12356;&#12383;&#12383;&#12417;&#12289;&#25991;&#23383;&#21015;&#12364;&#27491;&#12375;&#12367;&#35501;&#12417;&#12390;&#12356;&#12394;&#12356;&#21487;&#33021;&#24615;&#12364;&#22823;&#12391;&#12377;&#12290;</span>
+</pre><pre class="codeoutput">
+text =
+
+    '" D o   t h l   R i g  &aelig; &nbsp; T h i n g . "'
+
+</pre><h2 id="24">&#32080;&#26524;&#25407;&#20837;(&#35492;&#12426;&#35330;&#27491;&#12354;&#12426;)</h2><p>- Insert decoded data into image and visualize it</p><pre class="codeinput">I1 = insertObjectAnnotation(img, <span class="string">'rectangle'</span>, bbox.BoundingBox,<span class="keyword">...</span>
+    text, <span class="string">'TextBoxOpacity'</span>,0.9,<span class="string">'FontSize'</span>,26,<span class="string">'LineWidth'</span>,3);
+figure, imshow(I1)
+</pre><pre class="codeoutput">&#35686;&#21578;: &#26082;&#23450;&#12398;&#12501;&#12457;&#12531;&#12488; LucidaSansRegular &#12395;&#12399;&#12289;&#20837;&#21147;&#12392;&#12375;&#12390;&#25351;&#23450;&#12373;&#12428;&#12383; 1 &#12388;&#20197;&#19978;&#12398;&#25991;&#23383;&#12364;&#21547;&#12414;&#12428;&#12390;&#12356;
+&#12414;&#12379;&#12435;&#12290;&#12381;&#12428;&#12425;&#12398;&#25991;&#23383;&#12434;&#21066;&#38500;&#12377;&#12427;&#12363;&#12289;&#12381;&#12428;&#12425;&#12398;&#25991;&#23383;&#12434;&#21547;&#12416;&#21029;&#12398;&#12501;&#12457;&#12531;&#12488; &#12501;&#12449;&#12452;&#12523;&#12434;&#20351;&#29992;&#12377;&#12427;&#12371;&#12392;&#12434;&#26908;&#35342;&#12375;&#12390;
+&#12367;&#12384;&#12373;&#12356;&#12290;'Font' &#12497;&#12521;&#12513;&#12540;&#12479;&#12540;&#20516;&#12398;&#12506;&#12450;&#12434;&#20351;&#29992;&#12375;&#12390;&#12289;&#21029;&#12398;&#12501;&#12457;&#12531;&#12488;&#12434;&#25351;&#23450;&#12391;&#12365;&#12414;&#12377;&#12290; 
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_09.png" alt=""> <h2 id="25">&#35492;&#12426;&#35330;&#27491;&#31526;&#21495;&#12434;&#21033;&#29992;&#12375;&#12289;&#35492;&#12387;&#12383;&#25991;&#23383;&#21015;&#12434;&#35330;&#27491;&#12375;&#12414;&#12377;</h2><p>- Decode data bits with error correction</p><pre class="codeinput"><span class="comment">% QR&#12467;&#12540;&#12489;&#12391;&#12399;&#12502;&#12525;&#12483;&#12463;&#35492;&#12426;&#12395;&#24375;&#12356;RS(&#12522;&#12540;&#12489;&#12477;&#12525;&#12514;&#12531;)&#12364;&#21033;&#29992;&#12373;&#12428;&#12390;&#12356;&#12414;&#12377;&#12290;</span>
+<span class="comment">% &#12414;&#12378;&#12289;2&#36914;&#12398;&#12499;&#12483;&#12488;&#21015;&#12434;10&#36914;&#12395;&#22793;&#25563;&#12375;&#12289;&#25201;&#12356;&#12420;&#12377;&#12367;&#12375;&#12414;&#12377;&#12290;</span>
+data2 = zeros(1, 44);
+<span class="keyword">for</span> i = 1:44
+    tmp = data((i-1)*8+1:i*8);
+    data2(1, i) = bin2dec(tmp);
+<span class="keyword">end</span>
+<span class="comment">%&#12487;&#12540;&#12479;&#12392;&#35330;&#27491;&#31526;&#21495;&#12395;&#20998;&#38626;&#12375;&#12414;&#12377;&#12290;</span>
+data = data2(1, 1:28);
+tail = data2(1, 29:end);
+</pre><p>RS(&#12522;&#12540;&#12489;&#12477;&#12525;&#12514;&#12531;)&#24489;&#21495;&#21270;&#22120;&#12398;&#12467;&#12531;&#12501;&#12451;&#12464;&#12524;&#12540;&#12471;&#12519;&#12531;</p><pre class="codeinput">m = 8; <span class="comment">% 1&#12471;&#12531;&#12508;&#12523;&#12354;&#12383;&#12426;&#12398;&#12499;&#12483;&#12488;&#25968;</span>
+n = 2^m-1; <span class="comment">% &#31526;&#21495;&#35486;&#38263;</span>
+k = n-size(tail, 2); <span class="comment">% &#12513;&#12483;&#12475;&#12540;&#12472;&#38263;</span>
+
+hDec = comm.RSDecoder(n,k);
+hDec.GeneratorPolynomialSource = <span class="string">'Property'</span>; <span class="comment">% &#31526;&#21495;&#12398;&#29983;&#25104;&#22810;&#38917;&#24335;&#12399;&#12518;&#12540;&#12470;&#12540;&#25351;&#23450;</span>
+hDec.GeneratorPolynomial       = rsgenpoly(n,k,[],0); <span class="comment">% &#29983;&#25104;&#22810;&#38917;&#24335;</span>
+
+<span class="comment">% &#30701;&#32302;&#31526;&#21495;&#12391;&#12354;&#12427;&#12383;&#12417;&#12289;&#21069;&#26041;&#12434;&#12476;&#12525;&#12497;&#12487;&#12451;&#12531;&#12464;</span>
+shortmsg = [zeros(1,n-size(data, 2)-size(tail,2)) data tail]';
+
+decoded = step(hDec, shortmsg);
+decoded = decoded(size(decoded,1)-size(data,2)+1:size(decoded,1),1);
+
+<span class="comment">% 10&#36914;&gt;2&#36914;&#22793;&#25563;</span>
+tmp = 0;
+<span class="keyword">for</span> i = 1:28
+    tmp = [tmp, dec2bin(decoded(i),8)];
+<span class="keyword">end</span>
+databox = tmp(1,2:end);
+
+mode = databox(1:4);
+mode = bin2dec(mode);
+<span class="comment">% &#12371;&#12371;&#12391;&#12399;&#12289;8bit&#12514;&#12540;&#12489;&#12398;&#12415;&#21462;&#12426;&#19978;&#12370;&#12414;&#12377;&#12290;</span>
+<span class="keyword">if</span> mode == 4 <span class="comment">% 8bit&#12514;&#12540;&#12489;</span>
+    <span class="comment">%&#25991;&#23383;&#25968;&#25351;&#31034;&#23376;&#12398;&#24489;&#21495;</span>
+    length = databox(5:12);
+    length = bin2dec(length);
+    D = databox(13:end);
+    text = cell(1, length);
+    <span class="keyword">for</span> i = 1:length
+        tmp = D((i-1)*8+1:i*8);
+        text{1, i} = char(bin2dec(tmp));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% &#24489;&#21495;&#12375;&#12383;&#32080;&#26524;&#12434;&#34920;&#31034;</span>
+text = strjoin(text)
+</pre><pre class="codeoutput">
+text =
+
+    '" D o   t h e   R i g h t   T h i n g . "'
+
+</pre><h2 id="27">&#32080;&#26524;&#25407;&#20837;(&#35492;&#12426;&#35330;&#27491;&#12354;&#12426;)</h2><p>- Insert decoded data into image and visualize it</p><pre class="codeinput">I2 = insertObjectAnnotation(img, <span class="string">'rectangle'</span>, bbox.BoundingBox,<span class="keyword">...</span>
+    text, <span class="string">'TextBoxOpacity'</span>,0.9,<span class="string">'FontSize'</span>,26,<span class="string">'LineWidth'</span>,3,<span class="string">'Font'</span>,<span class="string">'Calibri'</span>);
+figure, imshow(I2)
+</pre><img vspace="5" hspace="5" src="tb_qrcodeDec_v2_10.png" alt=""> <p class="footer">Copyright 2019 The MathWorks, Inc.<br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% QR Code decoder
+% - This example shows how to decode QR Code encoded in version2 format.
+% *QR Code is a registered trademark of DENSO WAVE INCORPORATED
+
+% バージョン2、誤り訂正レベルLのQRコードを復号する流れを確認するための
+% サンプルコードです
+% *QRコードは(株)デンソーウェーブの登録商標です
+clear all, close all, clc;
+
+%% 画像データ読み込み 
+% - Read Image
+
+% 予め作成しておいた画像データを読み込みます。webCamで斜めから撮影しており、
+% 歪んでいます。また、QRコード上にはMathWorksのロゴが描かれた紙が置かれ、
+% コードの一部が隠れている状態です
+img = imread('mwprinciple_webcam.png');
+%img = imrotate(img, 180);
+imshow(img)
+
+%% 画像データを2値化 
+% - Convert RGB to grayscale image and binarize
+bw = imbinarize(rgb2gray(img));
+imshow(bw)
+
+%% QRコードの位置検出用パタン(ファインダ)検出
+% - Find where the finder patterns are
+[Centroid, bw2, flag, width, bbox] = detectFinder(bw);
+
+%% ファインダの中心3座標を抽出
+% - Extract XY coordinates of center of finder patterns
+markers = Centroid(logical(flag),:);
+
+%% 歪み補正用アライメントパターン検出
+% - Find where the alignment pattern is
+bwa = imclearborder(bw);
+bwa = bwpropfilt(bwa, 'EulerNumber', [0, 0]);
+bwa = imfill(bwa, 'holes');
+stats = regionprops(bwa, 'Area', 'Centroid');
+area = [stats.Area];
+[mv, i] = min(area);
+alp = stats(i).Centroid;
+
+%% ファインダ&アライメントパターンの位置を可視化
+% - Visualize finder and alignment patterns
+
+% ファインダの位置可視化用マスク
+bwf = imfill(bw2, 'holes');
+
+% アライメントパターンの位置可視化用マスク
+bwl = bwlabel(bwa);
+bwl = bwl == i;
+bwlf = bwf | bwl;
+mask3 = repmat(bwlf, [1 1 3]);
+imgf = img;
+% ファインダ&アライメントパターン以外の輝度値を落とす
+imgf(~mask3) = imgf(~mask3) * 0.2;
+imshow(imgf)
+
+%% 3つのファインダの位置関係を算出し、どのような方向からQRコードが撮影されたのかを把握します
+% - Understand positional relation of each patterns
+
+[idxC, idxX, idxY] = finderPos(markers);
+% 3コーナーに配置されるファインダの中で、左上部に配置されるファインダの位置に
+% 赤色マーカを配置
+imgf = insertShape(imgf, 'FilledCircle', [markers(idxC, :) 10], 'Color', 'red');
+imshow(imgf)
+% X軸(水平)方向に対する角度が最小となる辺を成すファインダの位置に
+% 青色マーカを配置
+imgf = insertShape(imgf, 'FilledCircle', [markers(idxX, :) 10], 'Color', 'blue');
+imshow(imgf)
+% Y軸(垂直)方向に対する角度が最小となる辺を成すファインダの位置に
+% 黄色マーカを配置
+imgf = insertShape(imgf, 'FilledCircle', [markers(idxY, :) 10], 'Color', 'yellow');
+imshow(imgf)
+
+%% 歪んでいるQRコードを幾何学的変換により補正します 
+% - Create x and y coordinates of control points for geometric transformation
+
+[Cref, Xref, Yref, Aref] = createControlPts(idxC, idxX, idxY, width, width, markers);
+
+post = [Cref; Xref; Yref; Aref];
+org = [markers(idxC, :); markers(idxX, :); markers(idxY, :); alp];
+
+%% 幾何学変換用行列を算出
+% - Fit geometric transformation to control point pairs
+T = fitgeotrans(org, post,'projective'); % projective2d クラス（変換行列と次元）
+T.T             % 生成された行列の確認
+
+%% 幾何学的変換後、結果を表示
+% - Apply geometric transformation to image
+
+bwt = imwarp(bw, T); 
+imshow(bwt); % デフォルトは線形補間
+
+%% 細かいノイズを除去します
+% - Remove noises
+bwti = ~bwt;
+%Iinv = imclose(Iinv, strel(ones(2)));
+bwti = imopen(bwti, strel(ones(3)));
+bwti = imclearborder(bwti);
+bwt = ~bwti;
+imshow(bwt)
+
+%% 歪み補正が完了したので、改めてファインダの位置を求めます
+% - Find where the finder patterns are for transposed image
+[Centroid, bw, flag, width, ~] = detectFinder(bwt);
+
+%% 3座標を抽出
+% - Extract XY coordinates of center of finder patterns
+markers = Centroid(logical(flag),:);
+
+%% 3つのファインダの位置関係を算出します
+% - Understand positional relation of each patterns
+[idxC, idxX, idxY] = finderPos(markers);
+
+%% 座標位置に応じて画像回転
+% - Rotate image and coordinates to locate the corner of finder patterns to
+% top left
+[idxC, idxX, idxY, bwt] = rotPosition(idxC, idxX, idxY, bwt, markers);
+imshow(bwt)
+
+%% 本例題では25x25セルのバージョン2 QRコードを用いていますが、画像における1セルあたりの大きさを求めます
+% - Calculate the size of cell for version2 QR Code in an image
+
+% 1セルの高さを決定
+% ファインダマーカー間の距離は18セルであるので、regionpropsで求めた座標の
+% 距離を18で割り、1セル間の高さを求めます
+%xy = round(markers(idxC,:));
+xy = round(idxC);
+%height = (markers(idxY, 2) - xy(2)) / 18;
+height = (idxY(1, 2) - xy(2)) / 18;
+% 同様にして1セルの幅を求めます
+width = (idxX(1, 1) - xy(1)) / 18;
+
+% QRコードに埋め込まれているタイミングパターンを利用した方がより正確ですが、
+% 簡略化のために本例題では割愛します。
+
+%% 次に、各セルの中心座標を表す配列を作成します
+% - Create array that represents x and y coordinates of each cells
+
+%QRコード : バージョン2は縦横25セル
+xref = xy(1) - width*3;
+yref = xy(2) - height*3;
+xtable = (1:25) * width - width;
+xtable = round(xtable + xref);
+ytable = (1:25) * height - height;
+ytable = round(ytable + yref);
+
+%% 求めた中心座標情報を基に、フォーマット情報を読み取ります
+% - Read format information to understand error correction level and mask
+% pattern used in QR Code
+
+% デコードを行うために必要な誤り訂正レベルや、施されたマスクパタンの情報が
+% 記述されています。
+bwo = ~bwt;
+fmt1 = bwo(ytable(9), xtable([1:6,8]));
+fmt2 = bwo(ytable([1:6, 8:9]), xtable(9));
+
+%fmt2 = bwo(xtable([1:6,8:9]), ytable(9));
+%fmt1 = bwo(xtable(9), ytable([1:6, 8]));
+
+fdata = [fmt1, fliplr(fmt2')];
+
+%% フォーマット情報の復号
+% - Decode format information using BCH decoder
+
+% フォーマット情報にはマスクパタンが施されているため、xorをとります。
+bitp = logical([1 0 1 0 1 0 0 0 0 0 1 0 0 1 0]);
+fdata = xor(fdata, bitp);
+% BCH符号により符号化されているので、復号します
+finfo = bchdec(gf(fdata), 15, 5);
+minfo = finfo(3:5); %マスクパタン情報
+
+%% 次に、データを読み取る順番を示すインデックステーブルを作成します
+% - Create index table that represents how to read data bits and error
+% correction bits
+
+% 読み出しは右下角から順に、隣り合う列と交互に読み出していき、
+% コードの上端もしくは下端に到達した場合は読み出す方向を転換します。
+
+% 基準テーブル作成
+xidx = 0:24;
+xidx = repmat(xidx, [25, 1]);
+yidx = 0:24;
+yidx = repmat(yidx', [1, 25]);
+idxtbl = cat(3, xidx, yidx);
+% データ読み取り箇所インデックス算出
+[xidx yidx reftable] = readtable(28+16);
+% 読み出し方が特殊なので、データと訂正符号が格納されている領域を
+% 可視化して確認します。
+reftable = label2rgb(reftable);
+figure, imshow(reftable)
+title('QR code layout : Version2, Error correction level = L')
+
+%% 作成したインデックスに従い、データを読み取ります
+% - Read data and error correction bits according to the table
+data = bwo(ytable(yidx), xtable(xidx));
+%data = bwo(xtable(xidx), ytable(yidx));
+
+data = diag(data);
+mx = idxtbl(:,:,1);
+mx = mx(yidx, xidx);
+mx = diag(mx);
+my = idxtbl(:,:,2);
+my = my(yidx, xidx);
+my = diag(my);
+
+% フォーマット情報に記載されたマスクパタンの情報を基に、
+% 該当箇所のデータを反転します。
+mask = cat(3, mx, my);
+invidx =  maskGen(mask, minfo);
+data(invidx) = ~data(invidx);
+
+%% 読み出したビット列を復号してみます
+% - Try to decode data without error correction
+
+% version2, 誤り訂正レベルLの場合、文字数は最大28、
+% 誤り訂正符号は16となります。
+
+% データの先頭4bitはQRコードのモード指示子になっています。
+% 以降のデコードに必要なため、まずモードを確認します。
+% 1 : 数字モード
+% 2 : 英数字モード 
+% 3 : 8bitモード
+% 4 : 漢字モード
+data = num2str(data)';
+mode = data(1:4);
+mode = bin2dec(mode);
+
+% ここでは、8bitモードのみ取り上げます。
+if mode == 4 % 8bitモード
+    %文字数指示子の復号
+    length = data(5:12);
+    length = bin2dec(length);
+    D = data(13:end);
+    text = cell(1, length);
+    for i = 1:length
+        tmp = D((i-1)*8+1:i*8);
+        text{1, i} = char(bin2dec(tmp));
+    end
+end
+% 復号した結果を表示
+text = strjoin(text)
+
+% 何らかの文字列が確認できましたが、QRコード上に置かれた紙によって
+% 一部が隠れていたため、文字列が正しく読めていない可能性が大です。
+
+%% 結果挿入(誤り訂正あり)
+% - Insert decoded data into image and visualize it
+I1 = insertObjectAnnotation(img, 'rectangle', bbox.BoundingBox,...
+    text, 'TextBoxOpacity',0.9,'FontSize',26,'LineWidth',3);
+figure, imshow(I1)
+
+%% 誤り訂正符号を利用し、誤った文字列を訂正します
+% - Decode data bits with error correction
+
+% QRコードではブロック誤りに強いRS(リードソロモン)が利用されています。
+% まず、2進のビット列を10進に変換し、扱いやすくします。
+data2 = zeros(1, 44);
+for i = 1:44
+    tmp = data((i-1)*8+1:i*8);
+    data2(1, i) = bin2dec(tmp);
+end
+%データと訂正符号に分離します。
+data = data2(1, 1:28);
+tail = data2(1, 29:end);
+
+%%
+% RS(リードソロモン)復号化器のコンフィグレーション
+m = 8; % 1シンボルあたりのビット数
+n = 2^m-1; % 符号語長
+k = n-size(tail, 2); % メッセージ長
+
+hDec = comm.RSDecoder(n,k);
+hDec.GeneratorPolynomialSource = 'Property'; % 符号の生成多項式はユーザー指定
+hDec.GeneratorPolynomial       = rsgenpoly(n,k,[],0); % 生成多項式
+
+% 短縮符号であるため、前方をゼロパディング
+shortmsg = [zeros(1,n-size(data, 2)-size(tail,2)) data tail]'; 
+
+decoded = step(hDec, shortmsg);
+decoded = decoded(size(decoded,1)-size(data,2)+1:size(decoded,1),1);
+
+% 10進>2進変換
+tmp = 0;
+for i = 1:28
+    tmp = [tmp, dec2bin(decoded(i),8)];
+end
+databox = tmp(1,2:end);
+
+mode = databox(1:4);
+mode = bin2dec(mode);
+% ここでは、8bitモードのみ取り上げます。
+if mode == 4 % 8bitモード
+    %文字数指示子の復号
+    length = databox(5:12);
+    length = bin2dec(length);
+    D = databox(13:end);
+    text = cell(1, length);
+    for i = 1:length
+        tmp = D((i-1)*8+1:i*8);
+        text{1, i} = char(bin2dec(tmp));
+    end
+end
+% 復号した結果を表示
+text = strjoin(text)
+
+%% 結果挿入(誤り訂正あり)
+% - Insert decoded data into image and visualize it
+I2 = insertObjectAnnotation(img, 'rectangle', bbox.BoundingBox,...
+    text, 'TextBoxOpacity',0.9,'FontSize',26,'LineWidth',3,'Font','Calibri');
+figure, imshow(I2)
+
+%%
+% Copyright 2019 The MathWorks, Inc.
+##### SOURCE END #####
+--></body></html>

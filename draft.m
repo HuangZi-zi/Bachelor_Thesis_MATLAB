@@ -1,7 +1,4 @@
-img=imread("Resource\corridor.jpg");
-gray=im2gray(img);
-BW=imbinarize(gray,"adaptive");
-
-figure
-imshow(BW)
+%img=imread("Resource\mwprinciple_webcam.png");
+img=imread("Resource\QRcode.jpg");
+tb_qrcodeDec_v2(img)
 
