@@ -2,17 +2,17 @@
 if(1)
     clear;
     cam=webcam(2);
-    v=200;
+    v=400;
     fismat=readfis('yz001');
 
     % 接收读码器信号的端口
-    clear obj1
-    obj1=serialport("COM10",9600);
-    u_QR_Serial(obj1);
+%     clear obj1
+%     obj1=serialport("COM10",9600);
+%     u_QR_Serial(obj1);
 
     % 发送控制指令的端口
-    %     clear obj2
-    %     obj2=serialport("COM9",19200,'Timeout', 0.2);
+        clear obj2
+        obj2=serialport("COM9",19200,'Timeout', 0.2);
 
 
     %figure;
@@ -20,13 +20,13 @@ if(1)
     %imshow(img);
 
     for iii=1:500
-        if size(obj1.UserData)>0
-            data=obj1.UserData;
-            data_s=char(data);
-            v=str2num(data_s);
-            fprintf("input: %d\n",v);
-            obj1.UserData=[];
-        end
+%         if size(obj1.UserData)>0
+%             data=obj1.UserData;
+%             data_s=char(data);
+%             v=str2num(data_s);
+%             fprintf("input: %d\n",v);
+%             obj1.UserData=[];
+%         end
         img = snapshot(cam);
         % imshow(i);
         % preview(cam)
@@ -87,7 +87,7 @@ if(1)
         two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
         % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
         sendbuff(10)= two_bits_d;
-%         write(obj2,sendbuff,"uint8");
+         write(obj2,sendbuff,"uint8");
     end
 
     % 停止机器人
@@ -101,10 +101,10 @@ if(1)
     sendbuff(8)= hex2dec('00');
     sendbuff(9)= hex2dec('00');
     sendbuff(10)= hex2dec('84');
-    %         write(obj2,sendbuff,"uint8")
+             write(obj2,sendbuff,"uint8")
 
     %关闭串口
-    %         delete(obj2);
+             delete(obj2);
     clear obj2;
 
 end
