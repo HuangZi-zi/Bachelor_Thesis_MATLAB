@@ -62,13 +62,33 @@ function readSerialData(src,~)
     data = fread(src,1);
     src.UserData(end+1) = data;
     %src.UserData.Count = src.UserData.Count + 1;
-     disp(data);   
-    
+    % disp(data);   
+    if size(src.UserData)==6
+            data=src.UserData;
+            data_s=char(data);            
+            data_n=str2num(data_s);
+            comm=floor(data_n/10000);
+            num=rem(data_n,10000);
+            switch comm
+                case 0
+                    sendcomm_stop(obj2);
+                case 1
+                    sendcomm_spin(obj2,comm,num);
+                case 2
+                    sendcomm_spin(obj2,comm,num);
+                case 4
+                    u_run_by_slidewindle
+                case 5
+                    v=num;
+                otherwise
+                    fprintf("Wrong Command!\n");
+            end
+            src.UserData=[];
+    end
 end
 
-
-
-%% QR Code通信协议：
+%% 
+% QR Code通信协议：
 % 1. 命令类型
 %     00，停止（手动输入）
 %     01，左转（地面

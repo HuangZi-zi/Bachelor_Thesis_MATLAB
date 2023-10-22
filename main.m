@@ -2,31 +2,46 @@
 if(1)
     clear;
     cam=webcam(2);
-    v=400;
     fismat=readfis('yz001');
-
+    v=200;
     % 接收读码器信号的端口
-%     clear obj1
-%     obj1=serialport("COM10",9600);
-%     u_QR_Serial(obj1);
+    clear obj1
+    obj1=serialport("COM12",9600);
+    u_QR_Serial(obj1);
 
     % 发送控制指令的端口
-        clear obj2
-        obj2=serialport("COM9",19200,'Timeout', 0.2);
-
-
-    %figure;
-    img = snapshot(cam);
-    %imshow(img);
+    clear obj2
+    obj2=serialport("COM9",19200,'Timeout', 0.2);
+    %obj1.writeport=obj2;
 
     for iii=1:500
-%         if size(obj1.UserData)>0
-%             data=obj1.UserData;
-%             data_s=char(data);
-%             v=str2num(data_s);
-%             fprintf("input: %d\n",v);
-%             obj1.UserData=[];
-%         end
+        if size(obj1.UserData,2)==6
+            data=obj1.UserData;
+            data_s=char(data);
+            data_n=str2num(data_s);
+            comm=floor(data_n/10000);
+            num=rem(data_n,10000);
+            switch comm
+                case 0
+                    sendcomm_stop(obj2);
+                    break;
+                case 1
+                    sendcomm_spin(obj2,comm,num);
+                case 2
+                    sendcomm_spin(obj2,comm,num);
+                case 4
+                    v=2006;
+                case 5
+                    v=num;
+                otherwise
+                    fprintf("Wrong Command!\n");
+            end
+            obj1.UserData=[];
+        elseif size(obj1.UserData,2)>6
+            fprintf("Wrong Communication!\n");
+            obj1.UserData=[];
+        end
+
         img = snapshot(cam);
         % imshow(i);
         % preview(cam)
@@ -87,101 +102,102 @@ if(1)
         two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
         % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
         sendbuff(10)= two_bits_d;
-         write(obj2,sendbuff,"uint8");
-    end
-
-    % 停止机器人
-    sendbuff(1)= hex2dec('55');
-    sendbuff(2)= hex2dec('aa');
-    sendbuff(3)= hex2dec('71');
-    sendbuff(4)= hex2dec('04');
-    sendbuff(5)= hex2dec('10');
-    sendbuff(6)= hex2dec('00');
-    sendbuff(7)= hex2dec('00');
-    sendbuff(8)= hex2dec('00');
-    sendbuff(9)= hex2dec('00');
-    sendbuff(10)= hex2dec('84');
-             write(obj2,sendbuff,"uint8")
-
-    %关闭串口
-             delete(obj2);
-    clear obj2;
-
-end
-%% 基于Hough检测的双线循线
-
-if(0)
-    clear;
-    img=imread("Resource\corridor.jpg");
-    % img=imread("Resource\turn.jpg");
-    v=200;
-    fismat=readfis('yz001');
-    cam=webcam(2);
-
-    % 接收读码器信号的端口
-    clear obj1
-    obj1=serialport("COM10",9600);
-    u_QR_Serial(obj1);
-
-    % 发送控制指令的端口
-    %     clear obj2
-    %     obj2=serialport("COM9",19200,'Timeout', 0.2);
-
-    for iii=1:500
-        % img = snapshot(cam);
-        % img=u_segment(img);
-        img =imcrop(img,[90,150,1100,400]);
-        processed=u_basic_process(img);
-        % hist=u_histogram(img);
-        canny=u_find_edge(processed);
-        % [Lane_L_X, Lane_R_X, Lane_Y]=u_find_lane(canny,hist);
-        % u_fit(Lane_L_X, Lane_R_X, Lane_Y, img);
-
-        laneLines=u_hough_line_detect(img, canny);
-
-        % 计算最下面三行的中心座标
-        c3=0;
-        for i=399:401
-            % x=ay+b
-            c3=c3+(i*laneLines(2).a+laneLines(2).b) + (i*laneLines(1).a+laneLines(1).b);
-        end
-        c3=c3/6;
-        fprintf("c3:%d\n",c3)
-        output= evalfis(fismat,c3);% 模糊控制
-        % 确定输入为位置偏差，其论域范围确定为[−6,6]，而输出为转速，其论域范围为[−10,10]
-        dv=-fix(output*20);
-        vl=v+dv+32768;
-        vr=v-dv;
-        % 前进为左边反转，右边正转
-        % fprintf("left:%d; right:%d\n",vl,vr)
-        % fprintf("dv:%d\n",dv)
-        vlhex=dec2hex(vl,4);
-        vrhex=dec2hex(vr,4);
-        vlg= vlhex(1:2) ;%高位
-        vld=vlhex(3:4);%低位
-        vrg= vrhex(1:2) ;%高位
-        vrd=vrhex(3:4) ;%低位
-
-        sendbuff=zeros(1,9);
-        sendbuff(1)= hex2dec('55');
-        sendbuff(2)= hex2dec('aa');
-        sendbuff(3)= hex2dec('71');
-        sendbuff(4)= hex2dec('04');
-        sendbuff(5)= hex2dec('10');
-        sendbuff(6)= hex2dec(vlg);
-        sendbuff(7)= hex2dec(vld);
-        sendbuff(8)= hex2dec(vrg);
-        sendbuff(9)= hex2dec(vrd);
-        %校验和
-        %校验位=前面所有数据之和，取最后两位
-        add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
-        two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
-        % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
-        sendbuff(10)= two_bits_d;
         write(obj2,sendbuff,"uint8");
     end
 
     % 停止机器人
+    sendcomm_stop(obj2);
+
+    %     %关闭串口
+    %     delete(obj1);
+    %     clear obj1;
+    %     delete(obj2);
+    %     clear obj2;
+end
+    %% 基于Hough检测的双线循线
+
+if(0)
+        clear;
+        img=imread("Resource\corridor.jpg");
+        % img=imread("Resource\turn.jpg");
+        v=200;
+        fismat=readfis('yz001');
+        cam=webcam(2);
+
+        % 接收读码器信号的端口
+        clear obj1
+        obj1=serialport("COM10",9600);
+        u_QR_Serial(obj1);
+
+        % 发送控制指令的端口
+        %     clear obj2
+        %     obj2=serialport("COM9",19200,'Timeout', 0.2);
+
+        for iii=1:500
+            % img = snapshot(cam);
+            % img=u_segment(img);
+            img =imcrop(img,[90,150,1100,400]);
+            processed=u_basic_process(img);
+            % hist=u_histogram(img);
+            canny=u_find_edge(processed);
+            % [Lane_L_X, Lane_R_X, Lane_Y]=u_find_lane(canny,hist);
+            % u_fit(Lane_L_X, Lane_R_X, Lane_Y, img);
+
+            laneLines=u_hough_line_detect(img, canny);
+
+            % 计算最下面三行的中心座标
+            c3=0;
+            for i=399:401
+                % x=ay+b
+                c3=c3+(i*laneLines(2).a+laneLines(2).b) + (i*laneLines(1).a+laneLines(1).b);
+            end
+            c3=c3/6;
+            fprintf("c3:%d\n",c3)
+            output= evalfis(fismat,c3);% 模糊控制
+            % 确定输入为位置偏差，其论域范围确定为[−6,6]，而输出为转速，其论域范围为[−10,10]
+            dv=-fix(output*20);
+            vl=v+dv+32768;
+            vr=v-dv;
+            % 前进为左边反转，右边正转
+            % fprintf("left:%d; right:%d\n",vl,vr)
+            % fprintf("dv:%d\n",dv)
+            vlhex=dec2hex(vl,4);
+            vrhex=dec2hex(vr,4);
+            vlg= vlhex(1:2) ;%高位
+            vld=vlhex(3:4);%低位
+            vrg= vrhex(1:2) ;%高位
+            vrd=vrhex(3:4) ;%低位
+
+            sendbuff=zeros(1,9);
+            sendbuff(1)= hex2dec('55');
+            sendbuff(2)= hex2dec('aa');
+            sendbuff(3)= hex2dec('71');
+            sendbuff(4)= hex2dec('04');
+            sendbuff(5)= hex2dec('10');
+            sendbuff(6)= hex2dec(vlg);
+            sendbuff(7)= hex2dec(vld);
+            sendbuff(8)= hex2dec(vrg);
+            sendbuff(9)= hex2dec(vrd);
+            %校验和
+            %校验位=前面所有数据之和，取最后两位
+            add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
+            two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
+            % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
+            sendbuff(10)= two_bits_d;
+            write(obj2,sendbuff,"uint8");
+        end
+
+        % 停止机器人
+        sendcomm_stop(obj2)
+        %关闭串口
+        delete(obj2);
+        clear obj2;
+end
+
+
+    %% 停止函数
+function sendcomm_stop(port)
+    sendbuff=zeros(1,9);
     sendbuff(1)= hex2dec('55');
     sendbuff(2)= hex2dec('aa');
     sendbuff(3)= hex2dec('71');
@@ -192,9 +208,42 @@ if(0)
     sendbuff(8)= hex2dec('00');
     sendbuff(9)= hex2dec('00');
     sendbuff(10)= hex2dec('84');
-    write(obj2,sendbuff,"uint8")
+    write(port,sendbuff,"uint8")
+end
 
-    %关闭串口
-    delete(obj2);
-    clear obj2;
+    %% 旋转函数
+function sendcomm_spin(port,dir,time)
+    %    01，左转（地面
+    %    02，右转（地面
+    v=200;
+    vl=v+32768*(dir-1);
+    vr=v+32768*(dir-1);
+    vlhex=dec2hex(vl,4);
+    vrhex=dec2hex(vr,4);
+    vlg= vlhex(1:2) ;%高位
+    vld=vlhex(3:4);%低位
+    vrg= vrhex(1:2) ;%高位
+    vrd=vrhex(3:4) ;%低位
+
+    sendbuff=zeros(1,9);
+    sendbuff(1)= hex2dec('55');
+    sendbuff(2)= hex2dec('aa');
+    sendbuff(3)= hex2dec('71');
+    sendbuff(4)= hex2dec('04');
+    sendbuff(5)= hex2dec('10');
+    sendbuff(6)= hex2dec(vlg);
+    sendbuff(7)= hex2dec(vld);
+    sendbuff(8)= hex2dec(vrg);
+    sendbuff(9)= hex2dec(vrd);
+    %校验和
+    %校验位=前面所有数据之和，取最后两位
+    add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
+    two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
+    sendbuff(10)= two_bits_d;
+    write(port,sendbuff,"uint8");
+
+    pause(time/10);
+
+    % 停止机器人
+    sendcomm_stop(port);
 end
