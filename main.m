@@ -1,5 +1,5 @@
 %% 基于滑动窗口的双线循线
-if(1)
+if(0)
     clear;
     cam=webcam(2);
     fismat=readfis('yz001');
@@ -26,8 +26,8 @@ if(1)
             data=obj1.UserData;
             data_s=char(data);
             data_n=str2num(data_s);
-            comm=floor(data_n/10000);
-            num=rem(data_n,10000);
+            comm=floor(data_n/10000);%命令码
+            num=rem(data_n,10000);%命令数
             switch comm
                 case 0 % 停止
                     sendcomm_stop(obj2);
@@ -63,18 +63,18 @@ end
 
 %% 基于Hough检测的双线循线
 
-if(0)
+if(1)
         clear;
-        img=imread("Resource\corridor.jpg");
+        img=imread("Resource\mainline.jpg");
         % img=imread("Resource\turn.jpg");
         v=200;
         fismat=readfis('yz001');
-        cam=webcam(2);
+        % cam=webcam(2);
 
         % 接收读码器信号的端口
-        clear obj1
-        obj1=serialport("COM10",9600);
-        u_QR_Serial(obj1);
+%         clear obj1
+%         obj1=serialport("COM10",9600);
+%         u_QR_Serial(obj1);
 
         % 发送控制指令的端口
         %     clear obj2
@@ -90,7 +90,7 @@ if(0)
             % [Lane_L_X, Lane_R_X, Lane_Y]=u_find_lane(canny,hist);
             % u_fit(Lane_L_X, Lane_R_X, Lane_Y, img);
 
-            laneLines=u_hough_line_detect(img, canny);
+            laneLines=u_line_hough(img, canny);
 
             % 计算最下面三行的中心座标
             c3=0;
@@ -131,14 +131,14 @@ if(0)
             two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
             % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
             sendbuff(10)= two_bits_d;
-            write(obj2,sendbuff,"uint8");
+%             write(obj2,sendbuff,"uint8");
         end
 
         % 停止机器人
         sendcomm_stop(obj2)
         %关闭串口
-        delete(obj2);
-        clear obj2;
+%         delete(obj2);
+%         clear obj2;
 end
 
 %% 滑动窗口循线运行

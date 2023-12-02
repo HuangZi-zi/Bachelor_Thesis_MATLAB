@@ -9,9 +9,9 @@ IMGgray=rgb2gray(inputIMG);
 IMGblur = imgaussfilt(IMGgray,2);
 
 %膨胀
-IMGdil=imdilate(IMGblur,strel('square',21));
+IMGdil=imdilate(IMGblur,strel('square',3));
 %腐蚀
-IMGero=imerode(IMGdil,strel('square',9));
+IMGero=imerode(IMGdil,strel('square',3));
 
 
 % % 自适应二值化

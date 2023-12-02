@@ -130,7 +130,7 @@ else
     %figure;
     imshow(resultImage);
     % plot(xx,yy);
-    fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
+    % fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
     title('直线检测结果');
 end
 

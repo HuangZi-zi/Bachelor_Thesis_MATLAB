@@ -1,4 +1,5 @@
 function output = u_fit(Lane_L_X, Lane_R_X, Lane_Y, inputIMG)
+% 输入两列数据，分别进行二次函数拟合，将拟合结果以矩阵返回，并显示在输入的图像上
 
 % x_L=a_L * x.^2 + b_L * x + c_L;
 % x_R=a_R * x.^2 + b_R * x + c_R;

@@ -1,4 +1,6 @@
 function [edgeImage] = u_find_edge(inputIMG)
+%计算图像中的边缘
+
 
 kernel1=strel('square',1);
 kernel3=strel('square',3);
@@ -50,7 +52,7 @@ edgeImage=paddedImage;
 % edgeImageBlur=imgaussfilt(edgeImage, 5);
 % 
 % % 可视化结果
-% figure;
+figure;
 % subplot(2, 1, 1);
 % imshow(edgeImage, 'InitialMagnification', 'fit');
 % title('边缘检测结果');
@@ -74,8 +76,8 @@ edgeImage=paddedImage;
 % title('Blue');
 
 % subplot(2,2,4);
-% imshow(edgeImage);
-% title('Edges');
+imshow(edgeImage);
+title('Edges');
 % figure;
 % subplot(2, 1, 1);
 % imshow(edgeImage, 'InitialMagnification', 'fit');
