@@ -121,17 +121,19 @@
 %% 直线检测
 img=imread("Resource\mainline.jpg");
 img =imcrop(img,[90,150,1100,400]);
-blueChannel = img(:, :, 3);
-processed=im2gray(blueChannel);
-canny=u_find_edge(processed);
-laneLines=u_hough_line_detect(img, canny);
+% blueChannel = img(:, :, 3);
+% processed=im2gray(blueChannel);
+canny=u_find_edge(img);
+laneLines=u_line_hough(img, canny);
 %x=ay+b
-y=1:size(canny,1);
-x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
-hold on
-plot(x_mid,y,'.');
+% y=1:size(canny,1);
+% x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
+% hold on
+% plot(x_mid,y,'.');
 
-%%角点检测
+u_ROI(laneLines,img);
+
+%% 角点检测
 % close all;
 % clc;
 % % 读取图像信息（原图为灰度图）

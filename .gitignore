@@ -1,0 +1,16 @@
+# 忽略敏感信息
+*.key
+*.pem
+*.env
+*.config
+
+# 忽略References
+/References/
+
+# 忽略ppt 和 excel
+*.ppt
+*.pptx
+*.xlsx
+
+# 忽略导出的pdf
+*.pdf

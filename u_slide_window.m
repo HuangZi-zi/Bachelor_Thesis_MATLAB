@@ -1,4 +1,4 @@
-function [Lane_L_X, Lane_R_X, Lane_Y] = u_find_lane(inputIMG)
+function [Lane_L_X, Lane_R_X, Lane_Y] = u_slide_window(inputIMG)
 % 滑动窗口寻找标线
 
 %转为二值化图像处理

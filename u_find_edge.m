@@ -12,16 +12,16 @@ kernel5=strel('square',5);
 % % Split the image into three color channels (Red, Green, Blue)
 % redChannel = inputIMG(:, :, 1);
 % greenChannel = inputIMG(:, :, 2);
-% blueChannel = inputIMG(:, :, 3);
+blueChannel = inputIMG(:, :, 3);
 
-% 使用 Canny 边缘检测算法检测边缘
-edgeImage = edge(inputIMG, 'Canny');
-% cannyRed = edge(redChannel, 'Canny');
-% cannyGreen = edge(greenChannel, 'Canny');
-% cannyBlue = edge(blueChannel, 'Canny');
+% 使用 Sobel 边缘检测算法检测边缘
+% edgeImage = edge(inputIMG, 'sobel');
+% edgeRed = edge(redChannel, 'sobel');
+% edgeGreen = edge(greenChannel, 'sobel');
+edgeBlue = edge(blueChannel, 'sobel');
 
 % Combine the three edge images into a single image
-% combinedEdges = uint8(cannyRed+cannyGreen+cannyBlue) * 85;
+% combinedEdges = uint8(edgeRed+edgeGreen+edgeBlue) * 85;
 % combinedEdges = imbinarize(combinedEdges,0.5);
 
 % 裁剪边框
@@ -30,7 +30,7 @@ y = 10;  % Starting row
 w = width-2*x; % Width of the ROI
 h = height-2*y; % Height of the ROI
 % cropImage = combinedEdges(y:y+h-1, x:x+w-1);
-cropImage = edgeImage(y:y+h-1, x:x+w-1);
+cropImage = edgeBlue(y:y+h-1, x:x+w-1);
 
 % 重新填充
 paddedImage = zeros(height, width);

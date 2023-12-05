@@ -86,11 +86,11 @@ if(1)
             img =imcrop(img,[90,150,1100,400]);
             processed=u_basic_process(img);
             % hist=u_histogram(img);
-            canny=u_find_edge(processed);
-            % [Lane_L_X, Lane_R_X, Lane_Y]=u_find_lane(canny,hist);
+            edge=u_find_edge(img);
+            % [Lane_L_X, Lane_R_X, Lane_Y]=u_slide_window(canny,hist);
             % u_fit(Lane_L_X, Lane_R_X, Lane_Y, img);
 
-            laneLines=u_line_hough(img, canny);
+            laneLines=u_line_hough(img, edge);
 
             % 计算最下面三行的中心座标
             c3=0;
@@ -170,7 +170,7 @@ else
     d=c;
     % hist=u_histogram(img);
     % canny=u_find_edge(processed);
-    [Lane_L_X, Lane_R_X, Lane_Y]=u_find_lane(d);
+    [Lane_L_X, Lane_R_X, Lane_Y]=u_slide_window(d);
     c3=u_fit(Lane_L_X, Lane_R_X, Lane_Y, d);
     fprintf("c3:%d\n",c3)
 

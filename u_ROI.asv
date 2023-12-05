@@ -1,0 +1,35 @@
+% clear;
+% x=ay+b
+
+a1=laneLines(1).a;
+a2=laneLines(2).a;
+
+b1=laneLines(1).b;
+b2=laneLines(2).b;
+
+width_dyn=20;%动态的ROI宽度
+
+img=imread("Resource\mainline.jpg");
+
+[h,w,channel]=size(img);
+
+line_start_x=0;
+line_start_y=round(-b/a);
+
+line_end_x=w;
+line_end_y=round((line_end_x-b)/a);
+
+xi=[line_start_x,line_start_x,line_end_x,line_end_x];
+yi=[line_start_y-width_dyn,line_start_y+width_dyn,line_end_y+width_dyn,line_end_y-width_dyn];
+
+mask=roipoly(img,xi,yi);
+roi = bsxfun(@times, img, cast(mask, class(img)));
+
+figure;
+subplot(1, 2, 1);
+imshow(img);
+title('Original Image');
+
+subplot(1, 2, 2);
+imshow(roi);
+title('Selected Region');
