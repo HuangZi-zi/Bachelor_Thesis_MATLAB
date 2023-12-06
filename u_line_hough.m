@@ -1,14 +1,14 @@
-function laneLines = u_line_hough(img, cannyImage)
+function laneLines = u_line_hough(img, edge)
 
 % Perform Hough Transform to detect lines in the Canny image
-[H, theta, rho] = hough(cannyImage);
+[H, theta, rho] = hough(edge);
 
 % Set thresholds for line detection
-threshold = 0.5 * max(H(:));
+threshold = 0.2 * max(H(:));
 P = houghpeaks(H, 10, 'Threshold', threshold);
 
 % Extract lines from Hough Transform results
-lines = houghlines(cannyImage, theta, rho, P, 'FillGap', 20, 'MinLength', 40);
+lines = houghlines(edge, theta, rho, P, 'FillGap', 20, 'MinLength', 40);
 
 % 绘制所有直线
 resultImage = img;
@@ -17,6 +17,7 @@ resultImage = img;
 % resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'green', 'LineWidth', 1);
 % end
 
+% 读取直线信息
 for i = 1:length(lines)
     % x=ay+b
     a=(lines(i).point2(1) - lines(i).point1(1)) / (lines(i).point2(2) - lines(i).point1(2));
@@ -72,7 +73,7 @@ end
 leftLaneLines = [];
 rightLaneLines = [];
 for i = 1:length(mergedLines)
-    if mergedLines(i).point1(1) < size(cannyImage, 2) / 2
+    if mergedLines(i).point1(1) < size(edge, 2) / 2
         if mergedLines(i).a<0
             leftLaneLines = [leftLaneLines; mergedLines(i)];
         end
@@ -97,7 +98,7 @@ end
 [~,sorted_R] = sort(lineLengths_R, 'descend');
 
 if isempty(leftLaneLines) && isempty(rightLaneLines)
-    fprintf("error!!!");
+    fprintf("error!!!\n");
     return;
 
 elseif isempty(leftLaneLines)
@@ -127,7 +128,7 @@ else
 
     % xx=0:1000;
     % yy=leftLaneLines(sorted_L(1)).a * xx+ leftLaneLines(sorted_L(1)).b;
-    %figure;
+    figure;
     imshow(resultImage);
     % plot(xx,yy);
     % fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);

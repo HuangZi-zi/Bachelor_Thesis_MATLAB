@@ -1,0 +1,43 @@
+function output = u_point_orb(img)
+
+% img=imread("Resource\conor.png");
+% imread("Resource\luckin_1.jpg");
+blueChannel = img(:, :, 3);
+img =im2gray(blueChannel);
+img = imgaussfilt(img,2);
+
+keypoints=detectORBFeatures(img);
+% newPoints = selectUniform(keypoints,10,size(img));
+[features1,valid_points1] = extractFeatures(img,keypoints);
+
+ideal=imread("Resource\conor_ideal.png");
+blueChannel = ideal(:, :, 3);
+ideal =im2gray(blueChannel);
+ideal = imgaussfilt(ideal,2);
+keypoints2=detectHarrisFeatures(ideal);
+newPoints2 = selectUniform(keypoints2,5,size(ideal));
+[features2,valid_points2] = extractFeatures(ideal,keypoints2);
+figure;
+imshow(ideal);
+hold on;
+plot(newPoints2);
+
+indexPairs = matchFeatures(features1,features2);
+matchedPoints1 = valid_points1(indexPairs(1:20,1));
+matchedPoints2 = valid_points2(indexPairs(1:20,1));
+
+figure; ax = axes;
+showMatchedFeatures(img,ideal,matchedPoints1,matchedPoints2,"montag",Parent=ax);
+legend(ax,"Matched points 1","Matched points 2");
+
+% figure;
+% imshow(img);
+% hold on;
+% plot(newPoints);
+% title("ORB-Points");
+% 
+
+% 
+% output=newPoints;
+
+end
