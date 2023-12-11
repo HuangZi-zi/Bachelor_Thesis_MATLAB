@@ -6,7 +6,7 @@ img=double(im2gray(img));
 H=16;
 W=16;
 
-Tmse=100;
+Tmse=20;
 
 
 % data=zeros(M*N,3);
@@ -24,6 +24,11 @@ V_normal=cell(numNodesRows, numNodesCols);
 V_angle=zeros(numNodesRows, numNodesCols);
 V_plane=cell(numNodesRows, numNodesCols);
 V_MSE=zeros(numNodesRows, numNodesCols);
+
+V_merge=zeros(M,N);
+
+merged=cell(1,numNodesRows*numNodesCols/2);
+
 z_mean=zeros(numNodesRows, numNodesCols);
 
 % 每个node中的相对座标
@@ -76,42 +81,144 @@ for i=1:numNodesRows
     end
 end
 
-heap=V_MSE(:)';
+V_MSE_T=V_MSE';
+heap=(V_MSE_T(:))';
 [sorted_heap, index]=sort(heap);
 
-for i=1:size(heap,1)
-    current=index(i);
-    current_i=floor(current/numNodesCols);
-    current_j=rem(current,numNodesCols);
+merge_cluster=1;
 
+for i=1:size(heap,2)
+    current=index(1);
+    current_i=floor((current-1)/numNodesCols)+1;
+    current_j=current-(current_i-1)*numNodesCols;%rem(current,numNodesCols);
+    if current_i==1||current_i==numNodesRows||current_j==1||current_j==numNodesCols
+        continue
+    end
 
-    points_current(:,1)=points_r(:,1)+H*(current_i-1);%x
-    points_current(:,2)=points_r(:,2)+W*(current_j-1);%y
-    points_current(:,3)=(V_pixel{current_i,current_j}(:));%z
+    if ~isempty(V_pixel{current_i,current_j})
+        points_current(:,1)=points_r(:,1)+H*(current_i-1);%x
+        points_current(:,2)=points_r(:,2)+W*(current_j-1);%y
+        points_current(:,3)=(V_pixel{current_i,current_j}(:));%z
+%         index(1)=[];
+        if isempty(merged{1,1})
+            merged{1,1}=points_current; 
+        else
+            for j=1:merge_cluster
+                older=union(merged{1,j},points_current,"rows");
+                [outcome,newMse]=trymerge(add_new,Tmse);
+                if outcome
+                    merge_cluster=j;
+                    V_merge(points_current(:,1),points_current(:,2))=merge_cluster;
+                    merged{1,merge_cluster}=add_new;
+                    index=setdiff(index,current,'stable');
+                    break;
+                end                
+            end
+                            % 如果没有break，说明不能merge进之前的块里
+                merge_cluster=merge_cluster+1;
+                merged{1,merge_cluster}=points_current;
+        end
+    else
+        continue
+    end
+
     
-    points_left(:,1)=points_r(:,1)+H*(current_i-1);%x
-    points_left(:,2)=points_r(:,2)+W*(current_j-1-1);%y
-    points_left(:,3)=(V_pixel{current_i,current_j-1}(:));%z
+    if ~isempty(V_pixel{current_i,current_j-1}) && ismember(current-1,index)
+        points_left(:,1)=points_r(:,1)+H*(current_i-1);%x
+        points_left(:,2)=points_r(:,2)+W*(current_j-1-1);%y
+        points_left(:,3)=(V_pixel{current_i,current_j-1}(:));%z
+        merged_left=union(merged{1,merge_cluster},points_left,"rows");
+        [outcome,newMse]=trymerge(merged_left,Tmse);
+        if outcome
+            V_merge(points_left(:,1),points_left(:,2))=merge_cluster;
+            merged{1,merge_cluster}=merged_left;
+            index=setdiff(index,current-1,'stable');
+        else
+            merge_cluster=merge_cluster+1;
+            merged{1,merge_cluster}=points_current;
+        end
+    end
+    
+    if ~isempty(V_pixel{current_i,current_j+1}) && ismember(current+1,index)
+        points_right(:,1)=points_r(:,1)+H*(current_i-1);%x
+        points_right(:,2)=points_r(:,2)+W*(current_j-1+1);%y
+        points_right(:,3)=(V_pixel{current_i,current_j+1}(:));%z
+        merged_right=union(merged{1,merge_cluster},points_right,"rows");
+        [outcome,newMse]=trymerge(merged_right,Tmse);
+        if outcome
+            V_merge(points_right(:,1),points_right(:,2))=merge_cluster;
+            merged{1,merge_cluster}=merged_right;
+            index=setdiff(index,current+1,'stable');
+        else
+            merge_cluster=merge_cluster+1;
+            merged{1,merge_cluster}=points_current;
+        end
+    end
 
-    points_right(:,1)=points_r(:,1)+H*(current_i-1);%x
-    points_right(:,2)=points_r(:,2)+W*(current_j-1+1);%y
-    points_right(:,3)=(V_pixel{current_i,current_j+1}(:));%z
+    if ~isempty(V_pixel{current_i-1,current_j}) && ismember(current-numNodesCols,index)
+        points_up(:,1)=points_r(:,1)+H*(current_i-1-1);%x
+        points_up(:,2)=points_r(:,2)+W*(current_j-1);%y
+        points_up(:,3)=(V_pixel{current_i-1,current_j}(:));%z
+        merged_up=union(merged{1,merge_cluster},points_up,"rows");
+        [outcome,newMse]=trymerge(merged_up,Tmse);
+        if outcome
+            V_merge(points_up(:,1),points_up(:,2))=merge_cluster;
+            merged{1,merge_cluster}=merged_up;
+            index=setdiff(index,current-numNodesCols,'stable');
+        else
+            merge_cluster=merge_cluster+1;
+            merged{1,merge_cluster}=points_current;
+        end
+    end
 
-    points_up(:,1)=points_r(:,1)+H*(current_i-1-1);%x
-    points_up(:,2)=points_r(:,2)+W*(current_j-1);%y
-    points_up(:,3)=(V_pixel{current_i-1,current_j}(:));%z
-
-    points_down(:,1)=points_r(:,1)+H*(current_i-1+1);%x
-    points_down(:,2)=points_r(:,2)+W*(current_j-1);%y
-    points_down(:,3)=(V_pixel{current_i+1,current_j}(:));%z
+    if ~isempty(V_pixel{current_i+1,current_j}) && ismember(current+numNodesCols,index)
+        points_down(:,1)=points_r(:,1)+H*(current_i-1+1);%x
+        points_down(:,2)=points_r(:,2)+W*(current_j-1);%y
+        points_down(:,3)=(V_pixel{current_i+1,current_j}(:));%z
+        merged_down=union(merged{1,merge_cluster},points_down,"rows");
+        [outcome,newMse]=trymerge(merged_down,Tmse);
+        if outcome
+            V_merge(points_down(:,1),points_down(:,2))=merge_cluster;
+            merged{1,merge_cluster}=merged_down;
+            index=setdiff(index,current+numNodesCols,'stable');
+        else
+            merge_cluster=merge_cluster+1;
+            merged{1,merge_cluster}=points_current;
+        end
+    end
+    imshow(uint8(V_merge.*100));
 %     right=current+1;
 %     left=current-1;
 %     up=current-numNodesCols;
-%     down=current+numNodesCols;
-
-    
+%     down=current+numNodesCols;  
 end
+
+imshow(uint8(V_merge.*10));
     
+function [outcome,newMSE]=trymerge(points,Tmse)
+W=16;H=16;
+x=points(:,1);
+y=points(:,2);
+z=points(:,3);
+
+pc(:,1)=x-mean(x);
+pc(:,2)=y-mean(y);
+pc(:,3)=z-mean(z);
+
+sigma=pc'*pc./(W*H);
+        [eigenvector,eigenvalue]=eig(sigma);
+        eigenvalue=diag(eigenvalue);
+        [sorted_enigenvalue, index]=sort(eigenvalue);
+        if sorted_enigenvalue(1)<Tmse
+            outcome=true;
+            newMSE=sorted_enigenvalue(1);
+        else
+            outcome=false;
+            newMSE=inf;
+        end
+
+end
+
 
 
 %%
