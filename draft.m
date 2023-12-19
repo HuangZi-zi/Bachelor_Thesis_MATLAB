@@ -119,19 +119,19 @@
 % clear obj2;
 
 %% 直线检测
-img=imread("Resource\conor.png");
-% img =imcrop(img,[90,450,1100,400]);
-% img = u_basic_process(img);
-edge_img=u_edge(img);
-laneLines=u_line_hough(img, edge_img);
-points=u_point_orb(img);
-%x=ay+b
-% y=1:size(canny,1);
-% x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
-% hold on
-% plot(x_mid,y,'.');
-
-u_ROI(laneLines,img);
+% img=imread("Resource\conor.png");
+% % img =imcrop(img,[90,450,1100,400]);
+% % img = u_basic_process(img);
+% edge_img=u_edge(img);
+% laneLines=u_line_hough(img, edge_img);
+% points=u_point_orb(img);
+% %x=ay+b
+% % y=1:size(canny,1);
+% % x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
+% % hold on
+% % plot(x_mid,y,'.');
+% 
+% u_ROI(laneLines,img);
 
 %% 角点检测
 % close all;
@@ -210,3 +210,27 @@ u_ROI(laneLines,img);
 % %         pause;
 % %     end
 % % end
+
+%% 
+% 
+% rng('default') % For reproducibility
+% X = rand(3,2);
+% D2 = pdist(X,@naneucdist);
+% 
+% function D2 = naneucdist(XI,XJ)  
+% %NANEUCDIST Euclidean distance ignoring coordinates with NaNs
+% n = size(XI,2);
+% sqdx = (XI-XJ).^2;
+% nstar = sum(~isnan(sqdx),2); % Number of pairs that do not contain NaNs
+% nstar(nstar == 0) = NaN; % To return NaN if all pairs include NaNs
+% D2squared = sum(sqdx,2,'omitnan').*n./nstar; % Correction for missing coordinates
+% D2 = sqrt(D2squared);
+% end
+
+%% 
+rng('default') % For reproducibility
+X = rand(10,3).*10;
+tree = linkage(X,'average');
+
+figure()
+dendrogram(tree)
