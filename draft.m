@@ -231,6 +231,8 @@
 rng('default') % For reproducibility
 X = rand(10,3).*10;
 tree = linkage(X,'average');
-
+c=cluster(tree,'MaxClust',5);
+figure()
+scatter3(X(:,1),X(:,2),X(:,3),10,c)
 figure()
 dendrogram(tree)

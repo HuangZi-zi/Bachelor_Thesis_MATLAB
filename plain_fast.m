@@ -1,12 +1,12 @@
 clear;
-img=imread("Resource\depth_simu.png");
+img=imread("Resource\depth.png");
 img=double(im2gray(img));
 % [G,E]=initgraph(img);
 [M,N,channel]=size(img);
 H=16;
 W=16;
 
-Tmse=100;
+Tmse=20;
 
 
 % data=zeros(M*N,3);
@@ -20,7 +20,7 @@ numNodesRows = floor(M / H);
 numNodesCols = floor(N / W);
 
 V_pixel=cell(numNodesRows, numNodesCols);% nodes
-V_normal=cell(numNodesRows, numNodesCols);
+V_normal=zeros(numNodesRows, numNodesCols, 3);
 V_angle=zeros(numNodesRows, numNodesCols);
 V_plane=cell(numNodesRows, numNodesCols);
 V_MSE=zeros(numNodesRows, numNodesCols);
@@ -69,13 +69,14 @@ for i=1:numNodesRows
         [eigenvector,eigenvalue]=eig(sigma);
         eigenvalue=diag(eigenvalue);
         [sorted_enigenvalue, index]=sort(eigenvalue);
-        V_normal{i,j}=eigenvector(index(1),:)./norm(eigenvector(index(1),:));
-        V_angle(i,j)=acos(dot( V_normal{i,j},[1,1,1])/(norm( V_normal{i,j})*norm([1,1,1])))/pi*180;
+        normal_tempt=eigenvector(index(1),:)./norm(eigenvector(index(1),:));
+        V_normal(i,j,:)=reshape(normal_tempt, [1, 1, 3]);
+        V_angle(i,j)=acos(dot(normal_tempt,[1,1,1])/(norm(normal_tempt)*norm([1,1,1])))/pi*180;
         gmag=imgradient(V_pixel{i,j});
         
         if  any([z_mean(i,j)<2,max(max(gmag))>200,sorted_enigenvalue(1)>Tmse]) %missing %discontinue %large mse
             V_MSE(i,j)=inf;
-            V_normal{i,j}=[];
+            V_normal(i,j)=inf;
             V_angle(i,j)=inf;
             V_pixel{i,j}=[];
             z_mean(i,j)=inf;
@@ -102,9 +103,9 @@ nodes(:,4)=z_mean(:)';
 Z=linkage(nodes,'average','chebychev');
 figure()
 dendrogram(Z);
-c=cluster(Z,'cutoff',50,'criterion','distance');
-figure()
-gscatter(nodes(:,2),nodes(:,1),c);
+c=cluster(Z,'cutoff',60,'criterion','distance');
+% figure()
+% gscatter(nodes(:,2),nodes(:,1),c);
 
 % Define a colormap for visualization
 colormap = rand(10, 3); % Adjust the size (10) based on the maximum number of clusters
