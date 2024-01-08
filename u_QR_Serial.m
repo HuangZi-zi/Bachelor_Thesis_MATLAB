@@ -12,8 +12,8 @@ function u_QR_Serial(s)
 % delete(instrfindall)%和这一句的作用相同
 
 
-configureTerminator(s,"LF");
-flush(s);
+configureTerminator(s,"LF");% 结束符
+flush(s);% 清空数据
 %s.UserData = struct("Data",[],"Count",0);
 configureCallback(s,"byte",1,@readSerialData);
 % count=0;
@@ -62,7 +62,7 @@ function readSerialData(src,~)
     data = fread(src,1);
     src.UserData(end+1) = data;
     %src.UserData.Count = src.UserData.Count + 1;
-     disp(data);   
+    disp(data);   
     
 end
 

@@ -1,12 +1,28 @@
 clear;
 img=imread("Resource\depth.png");
-img=double(im2gray(img));
-% [G,E]=initgraph(img);
 [M,N,channel]=size(img);
 H=16;
 W=16;
 
-Tmse=20;
+% img=double(im2gray(img));
+img=im2double(img);
+img=histeq(img,256);
+img=img.*255;
+
+
+filter_size=9;
+x_dir=img(:)';
+fil_x=medfilt1(x_dir,filter_size);
+fil_x_re=reshape(fil_x,M,N)';
+y_dir=fil_x_re(:)';
+fil_xy=medfilt1(y_dir,filter_size);
+img=reshape(fil_xy,N,M)';
+
+
+% figure();imshow(img);
+
+
+Tmse=100;
 
 
 % data=zeros(M*N,3);
@@ -101,14 +117,13 @@ z_mean=z_mean';
 nodes(:,4)=z_mean(:)';
 
 Z=linkage(nodes,'average','chebychev');
-figure()
-dendrogram(Z);
-c=cluster(Z,'cutoff',60,'criterion','distance');
+figure();dendrogram(Z);
+c=cluster(Z,'cutoff',80,'criterion','distance');
 % figure()
 % gscatter(nodes(:,2),nodes(:,1),c);
 
 % Define a colormap for visualization
-colormap = rand(10, 3); % Adjust the size (10) based on the maximum number of clusters
+colormap = rand(500, 3); % Adjust the size (10) based on the maximum number of clusters
 
 % Loop through each node in the grid
 for row = 1:numNodesRows
@@ -125,28 +140,27 @@ for row = 1:numNodesRows
 end
 
 % Display the resulting image
-figure()
-imshow(V_merge);
+figure();imshow(V_merge);
 
-function distance = distfun(ZI,ZJ)
-[xrow,xcolumn]=size(ZI);
-[yrow,ycolumn]=size(ZJ);
-%初始化距离
-distance=zeros(yrow,1);
-if (xrow==1 && xcolumn==ycolumn)
-    for m=1:yrow
-        x1=ZI;%必须是行向量,不能是空向量
-        y1=ZJ(m,:);%必须是行向量,不能是空向量
-        b=( ~isnan(x1)) & (~isnan(y1)); %提取(x1,y1)中都不是nan的索引
-        A=[];
-        A(1,:)=x1(b);%必须是行向量,不能是空向量
-        A(2,:)=y1(b);%必须是行向量,不能是空向量
-        %计算距离
-        [~,distance(m,1)]=trymerge(A,100);
-    end
-end
-
-end
+% function distance = distfun(ZI,ZJ)
+% [xrow,xcolumn]=size(ZI);
+% [yrow,ycolumn]=size(ZJ);
+% %初始化距离
+% distance=zeros(yrow,1);
+% if (xrow==1 && xcolumn==ycolumn)
+%     for m=1:yrow
+%         x1=ZI;%必须是行向量,不能是空向量
+%         y1=ZJ(m,:);%必须是行向量,不能是空向量
+%         b=( ~isnan(x1)) & (~isnan(y1)); %提取(x1,y1)中都不是nan的索引
+%         A=[];
+%         A(1,:)=x1(b);%必须是行向量,不能是空向量
+%         A(2,:)=y1(b);%必须是行向量,不能是空向量
+%         %计算距离
+%         [~,distance(m,1)]=trymerge(A,100);
+%     end
+% end
+% 
+% end
 
 
 % merge_cluster=1;
@@ -262,29 +276,29 @@ end
 
 %imshow(uint8(V_merge.*10));
     
-function [outcome,newMSE]=trymerge(points,Tmse)
-W=16;H=16;
-x=points(:,1);
-y=points(:,2);
-z=points(:,3);
-
-pc(:,1)=x-mean(x);
-pc(:,2)=y-mean(y);
-pc(:,3)=z-mean(z);
-
-sigma=pc'*pc./(W*H);
-        [eigenvector,eigenvalue]=eig(sigma);
-        eigenvalue=diag(eigenvalue);
-        [sorted_enigenvalue, index]=sort(eigenvalue);
-        if sorted_enigenvalue(1)<Tmse
-            outcome=true;
-            newMSE=sorted_enigenvalue(1);
-        else
-            outcome=false;
-            newMSE=inf;
-        end
-
-end
+% function [outcome,newMSE]=trymerge(points,Tmse)
+% W=16;H=16;
+% x=points(:,1);
+% y=points(:,2);
+% z=points(:,3);
+% 
+% pc(:,1)=x-mean(x);
+% pc(:,2)=y-mean(y);
+% pc(:,3)=z-mean(z);
+% 
+% sigma=pc'*pc./(W*H);
+%         [eigenvector,eigenvalue]=eig(sigma);
+%         eigenvalue=diag(eigenvalue);
+%         [sorted_enigenvalue, index]=sort(eigenvalue);
+%         if sorted_enigenvalue(1)<Tmse
+%             outcome=true;
+%             newMSE=sorted_enigenvalue(1);
+%         else
+%             outcome=false;
+%             newMSE=inf;
+%         end
+% 
+% end
 
 
 
@@ -482,11 +496,61 @@ end
 % end
 % end
 
-%%
-
-
-
-
 
 %% 
+% 新思路：用梯度来聚类平面
+clear;
+img=imread("Resource\depth.png");
+[M,N,channel]=size(img);
+img=im2double(img);
+img=histeq(img,256);
 
+filter_size=9;
+x_dir=img(:)';
+fil_x=medfilt1(x_dir,filter_size);
+fil_x_re=reshape(fil_x,M,N)';
+y_dir=fil_x_re(:)';
+fil_xy=medfilt1(y_dir,filter_size);
+img=reshape(fil_xy,N,M)';
+figure();imshow(img);
+
+[M,N,channel]=size(img);
+[Gmag, Gdir]=imgradient(img);
+Gmag_s=imresize(Gmag,[42,51]);
+
+Gdir_s=imresize(Gdir,[42,51]);
+
+nodes(:,1)=Gmag_s(:)';
+nodes(:,2)=Gdir_s(:)';
+% 间隔采样
+
+
+Z=linkage(nodes,'ward');
+figure();dendrogram(Z);
+c=cluster(Z,'cutoff',1.2);
+fprintf("size of cluster: %d\n",max(c));
+% figure()
+% gscatter(nodes(:,2),nodes(:,1),c);
+
+% Define a colormap for visualization
+colormap = rand(500, 3); % Adjust the size (10) based on the maximum number of clusters
+
+% Loop through each node in the grid
+for row = 1:42
+    for col = 1:51
+        % Get the cluster assignment for the current node
+        currentNodeCluster = c((row - 1) * 10 + col);
+        
+        % Get the color for the current cluster
+        currentColor = colormap(currentNodeCluster, :);
+        
+        % Assign the color to the pixels of the current node in the output image
+        V_merge((row - 1) * 10 + 1 : row * 10, (col - 1) * 10 + 1 : col * 10, :) = repmat(reshape(currentColor, [1, 1, 3]), [10,10,1]);
+    end
+end
+
+% Display the resulting image
+figure();imshow(V_merge);
+
+%%
+pointCloud
