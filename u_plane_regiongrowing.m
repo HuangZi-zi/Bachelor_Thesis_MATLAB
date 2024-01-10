@@ -1,7 +1,7 @@
-function [outputArg1,outputArg2] = u_plane_regiongrowing(img_color, img_depth, kinect)
+function u_plane_regiongrowing(img_color, img_depth)
 
 img_color=imcrop(img_color,[0,0,512,370]);
-figure; imshow(img_color);
+% figure; imshow(img_color);
 [M,N,channel]=size(img_color);
 % 720,1080
 nodesize=10;
@@ -114,7 +114,7 @@ for i=1:node_m-1
     end
 end
 
-imshow(cell2mat(nodes));
+% imshow(cell2mat(nodes));
 
 y=(1:node_m)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
@@ -122,9 +122,10 @@ xr=edges(:,2);
 
 % x=[xl;xr];
 % y=repmat(y,2,1);
-
-zl=depth([xl,y]);
-zr=depth([xr,y]);
+indexl=(xl-1).*nodesize+y;
+indexr=(xr-1).*nodesize+y;
+zl=depth(indexl);
+zr=depth(indexr);
 
 a=(zl-zr)./(xl-xr);
 b=zl-a.*xl;
@@ -155,5 +156,6 @@ resultImage=img_color;
 for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
-figure; imshow(resultImage);
+% figure(1); imshow(resultImage);
 end
+timeit

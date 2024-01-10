@@ -1,7 +1,7 @@
 %% 基于滑动窗口的双线循线
-if(0)
+if(1)
     clear;
-    cam=webcam(2);
+    cam=webcam(4);
     fismat=readfis('yz001');
     v=200;
     % 接收读码器信号的端口
@@ -11,7 +11,7 @@ if(0)
 
     % 发送控制指令的端口
     clear obj2
-    obj2=serialport("COM13",19200,'Timeout', 0.2);
+    obj2=serialport("COM4",19200,'Timeout', 0.2);
     
     % 运行控制
     run_flag=0;
@@ -63,7 +63,7 @@ end
 
 %% 基于Hough检测的双线循线
 
-if(1)
+if(0)
         clear;
         img=imread("Resource\mainline.jpg");
         % img=imread("Resource\turn.jpg");
