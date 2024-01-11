@@ -105,7 +105,7 @@ if(0)
             dv=-fix(output*20);
             vl=v+dv+32768;
             vr=v-dv;
-            % 前进为左边反转，右边正转
+            % 前进为左边反转，右边正转5
             % fprintf("left:%d; right:%d\n",vl,vr)
             % fprintf("dv:%d\n",dv)
             vlhex=dec2hex(vl,4);

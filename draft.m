@@ -1,3 +1,27 @@
+%% 串口收发
+    clear obj2
+    obj2=serialport("COM3",19200,'Timeout', 0.2);
+    sendbuff=zeros(1,9);
+    sendbuff(1)= hex2dec('55');
+    sendbuff(2)= hex2dec('aa');
+    sendbuff(3)= hex2dec('71');
+    sendbuff(4)= hex2dec('04');
+    sendbuff(5)= hex2dec('10');
+    sendbuff(6)= hex2dec('03');
+    sendbuff(7)= hex2dec('20');
+    sendbuff(8)= hex2dec('03');
+    sendbuff(9)= hex2dec('20');
+    sendbuff(10)= hex2dec('ca');
+    write(obj2,sendbuff,"uint8")
+
+%% 论证使用RGB处理的必要性
+
+img=imread("Resource\mainline.jpg");
+imggray=im2gray(img);
+imshowpair(img,imggray,"montage");
+
+
+%%
 % clear;
 % %img=imread("Resource\mwprinciple_webcam.png");
 % img=imread("Resource\corridor.jpg");
@@ -243,11 +267,11 @@ addpath('C:\Users\YawnFun\Documents\project\Kin2\Mex');
 clear
 close all
 
-% Create Kinect 2 object and initialize it
+% Create Kinect 2 object and initiqalize it
 % Available sources: 'color', 'depth', 'infrared', 'body_index', 'body',
 % 'face' and 'HDface'
 k2 = Kin2('color','depth');
-i=1;
+i=10;
 % images sizes
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;

@@ -9,24 +9,29 @@ ideal_blueChannel = ideal(:, :, 3);
 ideal =im2gray(ideal_blueChannel);
 ideal = imgaussfilt(ideal,1);
 
-keypoints1=detectORBFeatures(img);
+
+% keypoints1=detectORBFeatures(img);
 % newPoints = selectUniform(keypoints,20,size(img));
+% [features1,valid_points1] = extractFeatures(img,keypoints1);
+keypoints1=detectSIFTFeatures(img);
 [features1,valid_points1] = extractFeatures(img,keypoints1);
 
-keypoints2=detectORBFeatures(ideal);
+% keypoints2=detectORBFeatures(ideal);
 % newPoints2 = selectUniform(keypoints2,20,size(ideal));
+% [features2,valid_points2] = extractFeatures(ideal,keypoints2);
+keypoints2=detectSIFTFeatures(ideal);
 [features2,valid_points2] = extractFeatures(ideal,keypoints2);
 
-% figure;
-% imshow(img);
-% hold on;
-% plot(keypoints1);
-% figure;
-% imshow(ideal);
-% hold on;
-% plot(keypoints2);
+figure;
+imshow(img);
+hold on;
+plot(keypoints1);
+figure;
+imshow(ideal);
+hold on;
+plot(keypoints2);
 
-indexPairs = matchFeatures(features2,features1);
+indexPairs = matchFeatures(features1,features2);
 matchedPoints1 = valid_points1(indexPairs(:,1),:);
 matchedPoints2 = valid_points2(indexPairs(:,2),:);
 

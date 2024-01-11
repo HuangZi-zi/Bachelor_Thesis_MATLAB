@@ -13,7 +13,7 @@ nodes=cell(node_m, node_n);% nodes
 depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
 
-t_color=3;% 颜色偏差的阈值
+t_color=0.95;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
 left_stop=0;
 right_stop=0;
@@ -34,9 +34,9 @@ for j=1:floor(node_n/2-1)
     node_right=nodes{node_m,node_mid+j};
     color_left=reshape(mean(node_left,[1,2]),1,3);
     color_right=reshape(mean(node_right,[1,2]),1,3);
-    left=colorangle(color_left,color_mid);
-    right=colorangle(color_right,color_mid);
-    if left<t_color
+    left=colorvalue(color_left,color_mid);
+    right=colorvalue(color_right,color_mid);
+    if left>t_color
         nodes{node_m,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
         if j==floor(node_n/2-1)
             edges(node_m,1)=node_mid-j;
@@ -46,7 +46,7 @@ for j=1:floor(node_n/2-1)
         edges(node_m,1)=node_mid-j;
         left_stop=j;
     end
-    if right<t_color&&~right_stop
+    if right>t_color&&~right_stop
         nodes{node_m,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
         if j==floor(node_n/2-1)
             edges(node_m,2)=node_mid+j;
@@ -70,44 +70,44 @@ for i=1:node_m-1
     color_mid=reshape(mean(node,[1,2]),1,3);
     color_left=reshape(mean(node_left,[1,2]),1,3);
     color_right=reshape(mean(node_right,[1,2]),1,3);
-    left=colorangle(color_left,color_mid);
-    right=colorangle(color_right,color_mid);
+    left=colorvalue(color_left,color_mid);
+    right=colorvalue(color_right,color_mid);
 
-    if left<t_color% 最左侧与中心相似，向左侧扩展
-        while left<t_color && left_stop<node_n/2-1
+    if left>t_color% 最左侧与中心相似，向左侧扩展
+        while left>t_color && left_stop<node_n/2-1
             left_stop=left_stop+1;
             node_left=nodes{node_m-i,node_mid-left_stop+1};
             color_left=reshape(mean(node_left,[1,2]),1,3);
-            left=colorangle(color_left,color_mid);
+            left=colorvalue(color_left,color_mid);
         end
         nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
         edges(node_m-i,1)=node_mid-left_stop+1;
     else% 最左侧与中心不相似，向右侧扩展
-        while left>t_color && left_stop>0
+        while left<t_color && left_stop>0
             left_stop=left_stop-1;
             node_left=nodes{node_m-i,node_mid-left_stop+1};
             color_left=reshape(mean(node_left,[1,2]),1,3);
-            left=colorangle(color_left,color_mid);
+            left=colorvalue(color_left,color_mid);
         end
         nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
         edges(node_m-i,1)=node_mid-left_stop+1;
     end
 
-    if right<t_color% 最右侧与中心相似，向右侧扩展
-        while right<t_color && right_stop<node_n/2
+    if right>t_color% 最右侧与中心相似，向右侧扩展
+        while right>t_color && right_stop<node_n/2
             right_stop=right_stop+1;
             node_right=nodes{node_m-i,node_mid+right_stop-1};
             color_right=reshape(mean(node_right,[1,2]),1,3);
-            right=colorangle(color_right,color_mid);
+            right=colorvalue(color_right,color_mid);
         end
         nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
         edges(node_m-i,2)=node_mid+right_stop-1;
     else% 最右侧与中心不相似，向左侧扩展
-        while right>t_color && right_stop>0
+        while right<t_color && right_stop>0
             right_stop=right_stop-1;
             node_right=nodes{node_m-i,node_mid+right_stop-1};
             color_right=reshape(mean(node_right,[1,2]),1,3);
-            right=colorangle(color_right,color_mid);
+            right=colorvalue(color_right,color_mid);
         end
         nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
         edges(node_m-i,2)=node_mid+right_stop-1;
@@ -156,6 +156,27 @@ resultImage=img_color;
 for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
-% figure(1); imshow(resultImage);
+
+figure(1); imshow(resultImage);
 end
-timeit
+
+function output=colorvalue(rgb1,rgb2)
+    rgb1 = im2double(rgb1(:));
+    rgb2 = im2double(rgb2(:));
+    v1=0.3*rgb1(1)+0.59*rgb1(2)+0.11*rgb1(3);
+    v2=0.3*rgb2(1)+0.59*rgb2(2)+0.11*rgb2(3);
+    
+    N1 = norm(rgb1);
+    N2 = norm(rgb2);
+    if isequal(rgb1,rgb2)
+        colorsin = 0;
+    else
+        colorsin = norm(cross(rgb1,rgb2))/(N1*N2);
+    end
+    if isequal(v1,v2)
+        valuesin = 0;
+    else
+        valuesin= norm(cross([v1;128;0],[v2;128;0])) / (norm([v1;128;0]) * (norm([v2;128;0])));
+    end
+    output=-(colorsin+valuesin)/2+1;
+end
