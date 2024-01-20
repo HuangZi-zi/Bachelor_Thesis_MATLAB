@@ -271,7 +271,7 @@ close all
 % Available sources: 'color', 'depth', 'infrared', 'body_index', 'body',
 % 'face' and 'HDface'
 k2 = Kin2('color','depth');
-i=10;
+i=20;
 % images sizes
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;
