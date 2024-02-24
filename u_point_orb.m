@@ -10,17 +10,17 @@ ideal =im2gray(ideal_blueChannel);
 ideal = imgaussfilt(ideal,1);
 
 
-% keypoints1=detectORBFeatures(img);
+keypoints1=detectSIFTFeatures(img);
 % newPoints = selectUniform(keypoints,20,size(img));
-% [features1,valid_points1] = extractFeatures(img,keypoints1);
-keypoints1=detectSURFFeatures(img);
 [features1,valid_points1] = extractFeatures(img,keypoints1);
+% keypoints1=detectSURFFeatures(img);
+% [features1,valid_points1] = extractFeatures(img,keypoints1);
 
-% keypoints2=detectORBFeatures(ideal);
+keypoints2=detectORBFeatures(ideal);
 % newPoints2 = selectUniform(keypoints2,20,size(ideal));
-% [features2,valid_points2] = extractFeatures(ideal,keypoints2);
-keypoints2=detectSURFFeatures(ideal);
 [features2,valid_points2] = extractFeatures(ideal,keypoints2);
+% keypoints2=detectSURFFeatures(ideal);
+% [features2,valid_points2] = extractFeatures(ideal,keypoints2);
 
 figure;
 imshow(img);
