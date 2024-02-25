@@ -724,9 +724,19 @@ min_R = ordfilt2(R,1,ones(5,5));
 min_G = ordfilt2(G,1,ones(5,5));
 min_B = ordfilt2(B,1,ones(5,5));
 
-R1=R-0.2.*min_R;
-G1=R-0.2.*min_G;
-B1=R-0.2.*min_B;
+ave_R=mean(min_R,"all");
+ave_G=mean(min_G,"all");
+ave_B=mean(min_B,"all");
+
+min_R(min_R(:)<ave_R)=0;
+min_G(min_G(:)<ave_G)=0;
+min_B(min_B(:)<ave_B)=0;
+
+figure();imshow(min_R);
+
+R1=(R-0.3.*min_R);
+G1=(R-0.3.*min_G);
+B1=(R-0.3.*min_B);
 
 % 孔洞填充
 R1=imopen(R1,ones(3,3));
@@ -749,5 +759,5 @@ img(:,:,3)=B1;
 figure();imshow(img);
 
 u_plane_regiongrowing(imgcd,imgd);
-% u_plane_regiongrowing(img,imgd)
+u_plane_regiongrowing(img,imgd)
 % 
