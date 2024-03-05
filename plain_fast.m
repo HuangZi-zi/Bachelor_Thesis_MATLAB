@@ -1,29 +1,28 @@
 clear;
-img=imread("Resource\depth.png");
+img=imread("C:\Users\YawnFun\Downloads\rgbd_dataset_freiburg1_floor\depth\1305033539.743179.png");
+rgb_img=imread("C:\Users\YawnFun\Downloads\rgbd_dataset_freiburg1_floor\rgb\1305033539.743168.png");
 [M,N,channel]=size(img);
+height=M;
+width=N;
 H=16;
 W=16;
 
 % img=double(im2gray(img));
-img=im2double(img);
-img=histeq(img,256);
-img=img.*255;
+img=cast(img,'double');
+% img=histeq(img,256);
+% img=img.*255;
 
-
-filter_size=9;
-x_dir=img(:)';
-fil_x=medfilt1(x_dir,filter_size);
-fil_x_re=reshape(fil_x,M,N)';
-y_dir=fil_x_re(:)';
-fil_xy=medfilt1(y_dir,filter_size);
-img=reshape(fil_xy,N,M)';
-
+% filter_size=9;
+% x_dir=img(:)';
+% fil_x=medfilt1(x_dir,filter_size);
+% fil_x_re=reshape(fil_x,M,N)';
+% y_dir=fil_x_re(:)';
+% fil_xy=medfilt1(y_dir,filter_size);
+% img=reshape(fil_xy,N,M)';
 
 % figure();imshow(img);
 
-
-Tmse=100;
-
+Tmse=400;
 
 % data=zeros(M*N,3);
 % for i=1:M
@@ -45,14 +44,53 @@ V_merge=zeros(M,N,3);
 
 merged=cell(1,numNodesRows*numNodesCols/2);
 
+x_mean=zeros(numNodesRows, numNodesCols);
+y_mean=zeros(numNodesRows, numNodesCols);
 z_mean=zeros(numNodesRows, numNodesCols);
 
-% 每个node中的相对座标
-points_r(:,1)=repelem(1:H,W)';%x
-points_r(:,2)=repmat(1:W,1,W)';%y
-% 归化为均值为0的序列后每个node中的座标
-points_c(:,1)=points_r(:,1)-(1+W)/2;
-points_c(:,2)=points_r(:,2)-(1+H)/2;
+% 将深度图反投影为点云
+% 校准数据
+K_rgb=[5.4886723733696215e+02 0. 3.1649655835885483e+02;
+    0. 5.4958402532237187e+02 2.2923873484682150e+02;
+    0. 0. 1.];
+dist_coeffs_rgb=[7.5390330809303213e-02 -2.8252164126047641e-02 ...
+    -9.5892915347463477e-03 -4.6479123130854875e-04 ...
+    -1.4030650062583919e-01];
+K_ir=[5.7592685448804468e+02 0. 3.1515026356388171e+02;
+    0. 5.7640791601093247e+02 2.3058580662101753e+02;
+    0. 0. 1.];
+dist_coeffs_ir=[-4.5096285298902479e-02 2.3953450975051985e-01 ...
+    -9.5873062860576726e-03 -2.9427017385906013e-03 ...
+    -1.0147872415919272e+00];
+R_stereo=[9.9993556622059065e-01 -1.1131100247700660e-02 2.2275579414240366e-03;
+    1.1108891478543052e-02 9.9989080121799856e-01 9.7456744121138719e-03;
+    -2.3357947736726680e-03 -9.7203007620451660e-03 9.9995002865936788e-01];
+t_stereo=[1.1497548441022023e+01; 3.5139088879273231e+01; 2.1887459420807019e+01];
+fx_ir = K_ir(1,1);
+fy_ir = K_ir(2,2);
+cx_ir = K_ir(1,3);
+cy_ir = K_ir(2,3);
+fx_rgb = K_rgb(1,1);
+fy_rgb = K_rgb(2,2);
+cx_rgb = K_rgb(1,3);
+cy_rgb = K_rgb(2,3);
+% 预计算
+X_pre=cast(zeros(height,width),'double');
+Y_pre=cast(zeros(height,width),'double');
+for r=0:1:height-1
+    for c=0:1:width-1
+        X_pre(r+1,c+1) = (c-cx_ir)/fx_ir;
+        Y_pre(r+1,c+1) = (r-cy_ir)/fy_ir;
+    end
+end
+X = X_pre.*img;
+Y = Y_pre.*img;
+X_t = (R_stereo(1,1))*X+(R_stereo(1,2))*Y+(R_stereo(1,3))*img + t_stereo(1);
+Y_t = (R_stereo(2,1))*X+(R_stereo(2,2))*Y+(R_stereo(2,3))*img + t_stereo(2);
+d_img = (R_stereo(3,1))*X+(R_stereo(3,2))*Y+(R_stereo(3,3))*img + t_stereo(3);
+[U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
+reshaped_point_cloud = reshape(cloud_array, [640, 480, 3]);
+reshaped_point_cloud=pagetranspose(reshaped_point_cloud);
 
 % v=struct('pixels', [], 'normal', [], 'plane', [],'v_MSE',[]);
 E=zeros(H*W,4);% edge
@@ -60,14 +98,23 @@ E=zeros(H*W,4);% edge
 % 主成分分析
 for i=1:numNodesRows
     for j=1:numNodesCols
-        V_pixel{i,j}=img((i-1)*H+1:min(i*H,M),(j-1)*W+1:min(j*W,N));
-       
-        points(:,1)=points_r(:,1)+H*(i-1);%x
-        points(:,2)=points_r(:,2)+W*(j-1);%y
-        points(:,3)=(V_pixel{i,j}(:));%z
+        V_pixel{i,j}=reshaped_point_cloud((i-1)*H+1:min(i*H,M),(j-1)*W+1:min(j*W,N),:);
+%         % 每个node中的相对座标
+%         points_r(:,1)=repelem(1:H,W)';%x
+%         points_r(:,2)=repmat(1:W,1,W)';%y
+%         % 归化为均值为0的序列后每个node中的座标
+%         points_c(:,1)=points_r(:,1)-(1+W)/2;
+%         points_c(:,2)=points_r(:,2)-(1+H)/2;
+        points(:,1)=reshape(V_pixel{i,j}(:,:,1),[],1);%x
+        points(:,2)=reshape(V_pixel{i,j}(:,:,2),[],1);%y
+        points(:,3)=reshape(V_pixel{i,j}(:,:,3),[],1);%z
 
+        x_mean(i,j)=mean(points(:,1));
+        y_mean(i,j)=mean(points(:,2));
         z_mean(i,j)=mean(points(:,3));
 
+        points_c(:,1)=points(:,1)-x_mean(i,j);
+        points_c(:,2)=points(:,2)-y_mean(i,j);
         points_c(:,3)=points(:,3)-z_mean(i,j);
 
         %[V_normal{i,j}, V_plane{i,j}] = fitPlane_SVD(V_pixel{i,j});
@@ -88,8 +135,13 @@ for i=1:numNodesRows
         normal_tempt=eigenvector(index(1),:)./norm(eigenvector(index(1),:));
         V_normal(i,j,:)=reshape(normal_tempt, [1, 1, 3]);
         V_angle(i,j)=acos(dot(normal_tempt,[1,1,1])/(norm(normal_tempt)*norm([1,1,1])))/pi*180;
-        gmag=imgradient(V_pixel{i,j});
+        %         gmag=imgradient(V_pixel{i,j});
         
+        dx = gradient(points_c(:,1));
+        dy = gradient(points_c(:,2));
+        dz = gradient(points_c(:,3));
+        gmag = sqrt(dx.^2+dy.^2+dz.^2);
+
         if  any([z_mean(i,j)<2,max(max(gmag))>200,sorted_enigenvalue(1)>Tmse]) %missing %discontinue %large mse
             V_MSE(i,j)=inf;
             V_normal(i,j)=inf;
@@ -118,7 +170,7 @@ nodes(:,4)=z_mean(:)';
 
 Z=linkage(nodes,'average','chebychev');
 figure();dendrogram(Z);
-c=cluster(Z,'cutoff',80,'criterion','distance');
+c=cluster(Z,'cutoff',400,'criterion','distance');
 % figure()
 % gscatter(nodes(:,2),nodes(:,1),c);
 
@@ -141,6 +193,7 @@ end
 
 % Display the resulting image
 figure();imshow(V_merge);
+figure();imshow(rgb_img);
 
 % function distance = distfun(ZI,ZJ)
 % [xrow,xcolumn]=size(ZI);
@@ -499,58 +552,87 @@ figure();imshow(V_merge);
 
 %% 
 % 新思路：用梯度来聚类平面
-clear;
-img=imread("Resource\depth.png");
-[M,N,channel]=size(img);
-img=im2double(img);
-img=histeq(img,256);
+% clear;
+% img=imread("Resource\depth.png");
+% [M,N,channel]=size(img);
+% img=im2double(img);
+% img=histeq(img,256);
+% 
+% filter_size=9;
+% x_dir=img(:)';
+% fil_x=medfilt1(x_dir,filter_size);
+% fil_x_re=reshape(fil_x,M,N)';
+% y_dir=fil_x_re(:)';
+% fil_xy=medfilt1(y_dir,filter_size);
+% img=reshape(fil_xy,N,M)';
+% figure();imshow(img);
+% 
+% [M,N,channel]=size(img);
+% [Gmag, Gdir]=imgradient(img);
+% Gmag_s=imresize(Gmag,[42,51]);
+% 
+% Gdir_s=imresize(Gdir,[42,51]);
+% 
+% nodes(:,1)=Gmag_s(:)';
+% nodes(:,2)=Gdir_s(:)';
+% % 间隔采样
+% 
+% 
+% Z=linkage(nodes,'ward');
+% figure();dendrogram(Z);
+% c=cluster(Z,'cutoff',1.2);
+% fprintf("size of cluster: %d\n",max(c));
+% % figure()
+% % gscatter(nodes(:,2),nodes(:,1),c);
+% 
+% % Define a colormap for visualization
+% colormap = rand(500, 3); % Adjust the size (10) based on the maximum number of clusters
+% 
+% % Loop through each node in the grid
+% for row = 1:42
+%     for col = 1:51
+%         % Get the cluster assignment for the current node
+%         currentNodeCluster = c((row - 1) * 10 + col);
+%         
+%         % Get the color for the current cluster
+%         currentColor = colormap(currentNodeCluster, :);
+%         
+%         % Assign the color to the pixels of the current node in the output image
+%         V_merge((row - 1) * 10 + 1 : row * 10, (col - 1) * 10 + 1 : col * 10, :) = repmat(reshape(currentColor, [1, 1, 3]), [10,10,1]);
+%     end
+% end
+% 
+% % Display the resulting image
+% figure();imshow(V_merge);
 
-filter_size=9;
-x_dir=img(:)';
-fil_x=medfilt1(x_dir,filter_size);
-fil_x_re=reshape(fil_x,M,N)';
-y_dir=fil_x_re(:)';
-fil_xy=medfilt1(y_dir,filter_size);
-img=reshape(fil_xy,N,M)';
-figure();imshow(img);
+%% Function projectPointCloud
+function [U, V, cloud_array] = projectPointCloud(X, Y, Z, fx_rgb, fy_rgb, cx_rgb, cy_rgb, z_min)
+    [height, width] = size(X);
 
-[M,N,channel]=size(img);
-[Gmag, Gdir]=imgradient(img);
-Gmag_s=imresize(Gmag,[42,51]);
+    % Project to image coordinates
+    U = X ./ Z;
+    V = Y ./ Z;
+    U = U * fx_rgb + cx_rgb;
+    V = V * fy_rgb + cy_rgb;
 
-Gdir_s=imresize(Gdir,[42,51]);
+    % Reusing U as cloud index
+    %U = V * width + U + 0.5;
 
-nodes(:,1)=Gmag_s(:)';
-nodes(:,2)=Gdir_s(:)';
-% 间隔采样
+    cloud_array = zeros(height * width, 3);
 
-
-Z=linkage(nodes,'ward');
-figure();dendrogram(Z);
-c=cluster(Z,'cutoff',1.2);
-fprintf("size of cluster: %d\n",max(c));
-% figure()
-% gscatter(nodes(:,2),nodes(:,1),c);
-
-% Define a colormap for visualization
-colormap = rand(500, 3); % Adjust the size (10) based on the maximum number of clusters
-
-% Loop through each node in the grid
-for row = 1:42
-    for col = 1:51
-        % Get the cluster assignment for the current node
-        currentNodeCluster = c((row - 1) * 10 + col);
-        
-        % Get the color for the current cluster
-        currentColor = colormap(currentNodeCluster, :);
-        
-        % Assign the color to the pixels of the current node in the output image
-        V_merge((row - 1) * 10 + 1 : row * 10, (col - 1) * 10 + 1 : col * 10, :) = repmat(reshape(currentColor, [1, 1, 3]), [10,10,1]);
+    it = 1;
+    for r = 1:height
+        for c = 1:width
+            z = Z(r, c);
+            u = U(r, c);
+            v = V(r, c);
+            if (z > z_min && u > 0 && v > 0 && u < width && v < height)
+                id = floor(v) * width + floor(u);
+                cloud_array(id, 1) = X(r, c);
+                cloud_array(id, 2) = Y(r, c);
+                cloud_array(id, 3) = z;
+            end
+            it = it + 1;
+        end
     end
 end
-
-% Display the resulting image
-figure();imshow(V_merge);
-
-%%
-pointCloud
