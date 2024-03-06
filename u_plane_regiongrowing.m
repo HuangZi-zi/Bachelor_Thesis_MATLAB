@@ -1,6 +1,7 @@
 function u_plane_regiongrowing(img_color, img_depth)
 
-img_color=imcrop(img_color,[0,0,512,370]);
+img_color=imcrop(img_color,[0,0,510,370]);
+img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
 [M,N,channel]=size(img_color);
 % 720,1080
@@ -20,29 +21,45 @@ left_stop=0;
 right_stop=0;
 
 % 划分为node
-for i=1:node_m-1
+for i=1:node_m
     for j=1:node_n
         nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N),:);
         depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N)),"all");
     end
 end
-i=node_m;
-for j=1:node_n
-    nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N),:);
-    depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N)),"all");
-    node_last_row{1,j}=nodes{i,j};
+
+
+% 以节点颜色为类，对每一行进行聚类分析
+for i=node_m:-1:1
+row_temp=nodes(i,:);
+image_array = cat(4, row_temp{:});
+mean_colors = squeeze(mean(mean(image_array, 1), 2));
+
+line_top=img_depth(i*nodesize-9,:);
+line_bottom=img_depth(i*nodesize,:);
+reshaped_topline=reshape(line_top,nodesize,node_n);
+reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
+spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
+
+for j = 1:51    
+    x = (1:nodesize)+(j-1)*nodesize;
+    y_top = repmat(i*nodesize-9,[1,10]);
+    y_bottom = repmat(i*nodesize,[1,10]);
+    z_top = reshaped_topline(:, j);
+
+    f_top = fit([x, y_top], z_top, spatial_line);
+    f_bottom = fit([x, y_bottom], z_bottom, spatial_line);
+    line_coefficients(:, i) = [f.a; f.b; f.c];
 end
 
 
-% 先遍历最下面一行
-% 对最下面一行进行聚类分析
-image_array = cat(4, node_last_row{:});
-mean_colors_last_row = squeeze(mean(mean(image_array, 1), 2)); % Calculate mean along rows and columns, then remove singleton dimensions
-Z=linkage(mean_colors_last_row','average','chebychev');
-figure();dendrogram(Z);
-c=cluster(Z,'cutoff',80,'criterion','distance');
-% 以最下面一行为种子节点，依次向上进行邻域生长
 
+
+Z=linkage(mean_colors','average','chebychev');
+%figure();dendrogram(Z);
+c(i,:)=cluster(Z,'cutoff',50,'criterion','distance');
+end
+edge=gradient(c);
 
 % 历史版本：从最下面中间开始遍历，再逐行向上
 % node=nodes{node_m,node_mid};
@@ -207,34 +224,8 @@ function output=colorvalue(rgb1,rgb2)
     end
     output=-(colorsin+valuesin)/2+1;
 end
-%% 将深度图反投影为点云
-function [U, V, cloud_array] = projectPointCloud(X, Y, Z, fx_rgb, fy_rgb, cx_rgb, cy_rgb, z_min)
-    [height, width] = size(X);
 
-    % Project to image coordinates
-    U = X ./ Z;
-    V = Y ./ Z;
-    U = U * fx_rgb + cx_rgb;
-    V = V * fy_rgb + cy_rgb;
+%% 检查平面相似度 optimality measure
+function output=optimality()
 
-    % Reusing U as cloud index
-    %U = V * width + U + 0.5;
-
-    cloud_array = zeros(height * width, 3);
-
-    it = 1;
-    for r = 1:height
-        for c = 1:width
-            z = Z(r, c);
-            u = U(r, c);
-            v = V(r, c);
-            if (z > z_min && u > 0 && v > 0 && u < width && v < height)
-                id = floor(v) * width + u;
-                cloud_array(id, 1) = X(r, c);
-                cloud_array(id, 2) = Y(r, c);
-                cloud_array(id, 3) = z;
-            end
-            it = it + 1;
-        end
-    end
 end

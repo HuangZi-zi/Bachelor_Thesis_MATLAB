@@ -143,18 +143,18 @@ imshowpair(img,imggray,"montage");
 % clear obj2;
 
 %% 直线检测
-% img=imread("Resource\conor.png");
-% % img =imcrop(img,[90,450,1100,400]);
-% % img = u_basic_process(img);
-% edge_img=u_edge(img);
-% laneLines=u_line_hough(img, edge_img);
+img=imread("Resource\corridor.jpg");
+% img =imcrop(img,[90,450,1100,400]);
+% img = u_basic_process(img);
+edge_img=u_edge(img);
+laneLines=u_line_hough(img, edge_img);
 % points=u_point_orb(img);
-% %x=ay+b
-% % y=1:size(canny,1);
-% % x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
-% % hold on
-% % plot(x_mid,y,'.');
-% 
+%x=ay+b
+% y=1:size(canny,1);
+% x_mid=y.*(laneLines(2).a+laneLines(1).a)/2+(laneLines(2).b+laneLines(1).b)/2;
+% hold on
+% plot(x_mid,y,'.');
+
 % u_ROI(laneLines,img);
 
 %% 角点检测

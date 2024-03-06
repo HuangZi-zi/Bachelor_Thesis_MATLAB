@@ -1,5 +1,5 @@
 function laneLines = u_line_hough(img, edge)
-
+tic
 % Perform Hough Transform to detect lines in the Canny image
 [H, theta, rho] = hough(edge);
 
@@ -9,13 +9,15 @@ P = houghpeaks(H, 10, 'Threshold', threshold);
 
 % Extract lines from Hough Transform results
 lines = houghlines(edge, theta, rho, P, 'FillGap', 20, 'MinLength', 40);
-
+toc
+disp(['运行时间: ',num2str(toc)]);
 % 绘制所有直线
 resultImage = img;
 % for i = 1:length(lines)
 % xy = [lines(i).point1; lines(i).point2];
-% resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'green', 'LineWidth', 1);
+% resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'green', 'LineWidth', 3);
 % end
+% figure();imshow(resultImage);title("检测到的所有直线");
 
 % 读取直线信息
 for i = 1:length(lines)
@@ -27,8 +29,8 @@ for i = 1:length(lines)
 end
 
 % Define parameters for line merging (adjust as needed)
-aThreshold = 0.1; % Maximum slope difference for merging line segments
-bThreshold = 20;    % Maximum intercept difference for merging line segments
+aThreshold = 0.15; % Maximum slope difference for merging line segments
+bThreshold = 50;    % Maximum intercept difference for merging line segments
 
 % Initialize an empty list to store merged lines
 mergedLines = [];
@@ -63,21 +65,21 @@ end
 
 % 绘制合并后所有直线
 %     resultImage = img;
-%     for i = 1:length(mergedLines)
-%     xy = [mergedLines(i).point1; mergedLines(i).point2];
-%     resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'red', 'LineWidth', 1);
-%     end
-
+% for i = 1:length(mergedLines)
+% xy = [mergedLines(i).point1; mergedLines(i).point2];
+% resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'red', 'LineWidth', 1);
+% end
+% figure();imshow(resultImage);title("合并后的所有直线");
 
 % 区分左侧和右侧的线段
 leftLaneLines = [];
 rightLaneLines = [];
 for i = 1:length(mergedLines)
-    if mergedLines(i).point1(1) < size(edge, 2) / 2
+    if mergedLines(i).point1(1) < 3*size(edge, 2) / 4 
         if mergedLines(i).a<0
             leftLaneLines = [leftLaneLines; mergedLines(i)];
         end
-    else
+    elseif mergedLines(i).point2(1) > size(edge, 2) / 4
         if mergedLines(i).a>0 && mergedLines(i).a < Inf
             rightLaneLines = [rightLaneLines; mergedLines(i)];
         end
@@ -126,6 +128,7 @@ else
     xy = [rightLaneLines(sorted_R(1)).point1; rightLaneLines(sorted_R(1)).point2];
     resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'cyan', 'LineWidth', 5);
 
+    
     % xx=0:1000;
     % yy=leftLaneLines(sorted_L(1)).a * xx+ leftLaneLines(sorted_L(1)).b;
     figure;
@@ -133,6 +136,7 @@ else
     % plot(xx,yy);
     % fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
     title('直线检测结果');
+   
 end
 
 
