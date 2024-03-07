@@ -1,7 +1,7 @@
 function u_plane_regiongrowing(img_color, img_depth)
 
-img_color=imcrop(img_color,[0,0,510,370]);
-img_depth=imcrop(img_depth,[0,0,510,370]);
+% img_color=imcrop(img_color,[0,0,510,370]);
+% img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
 [M,N,channel]=size(img_color);
 % 720,1080
@@ -15,7 +15,7 @@ depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
 node_last_row=cell(1, node_n);
 
-t_color=0.95;% 像素相似度的阈值
+t_color=0.93;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
 left_stop=0;
 right_stop=0;
@@ -29,127 +29,125 @@ for i=1:node_m
 end
 
 
-% 以节点颜色为类，对每一行进行聚类分析
-for i=node_m:-1:1
-row_temp=nodes(i,:);
-image_array = cat(4, row_temp{:});
-mean_colors = squeeze(mean(mean(image_array, 1), 2));
-
-line_top=img_depth(i*nodesize-9,:);
-line_bottom=img_depth(i*nodesize,:);
-reshaped_topline=reshape(line_top,nodesize,node_n);
-reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
-spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
-
-for j = 1:51    
-    x = (1:nodesize)+(j-1)*nodesize;
-    y_top = repmat(i*nodesize-9,[1,10]);
-    y_bottom = repmat(i*nodesize,[1,10]);
-    z_top = reshaped_topline(:, j);
-
-    f_top = fit([x, y_top], z_top, spatial_line);
-    f_bottom = fit([x, y_bottom], z_bottom, spatial_line);
-    line_coefficients(:, i) = [f.a; f.b; f.c];
-end
-
-
-
-
-Z=linkage(mean_colors','average','chebychev');
-%figure();dendrogram(Z);
-c(i,:)=cluster(Z,'cutoff',50,'criterion','distance');
-end
-edge=gradient(c);
+% % 以节点颜色为类，对每一行进行聚类分析
+% for i=node_m:-1:1
+% row_temp=nodes(i,:);
+% image_array = cat(4, row_temp{:});
+% mean_colors = squeeze(mean(mean(image_array, 1), 2));
+% 
+% line_top=img_depth(i*nodesize-9,:);
+% line_bottom=img_depth(i*nodesize,:);
+% reshaped_topline=reshape(line_top,nodesize,node_n);
+% reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
+% spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
+% 
+% for j = 1:51    
+%     x = (1:nodesize)+(j-1)*nodesize;
+%     y_top = repmat(i*nodesize-9,[1,10]);
+%     y_bottom = repmat(i*nodesize,[1,10]);
+%     z_top = reshaped_topline(:, j);
+% 
+%     f_top = fit([x, y_top], z_top, spatial_line);
+%     f_bottom = fit([x, y_bottom], z_bottom, spatial_line);
+%     line_coefficients(:, i) = [f.a; f.b; f.c];
+% end
+% 
+% Z=linkage(mean_colors','average','chebychev');
+% %figure();dendrogram(Z);
+% c(i,:)=cluster(Z,'cutoff',50,'criterion','distance');
+% end
+% edge=gradient(c);
 
 % 历史版本：从最下面中间开始遍历，再逐行向上
-% node=nodes{node_m,node_mid};
-% color_mid=reshape(mean(node,[1,2]),1,3);
-% for j=1:floor(node_n/2-1)
-%     node_left=nodes{node_m,node_mid-j};
-%     node_right=nodes{node_m,node_mid+j};
-%     color_left=reshape(mean(node_left,[1,2]),1,3);
-%     color_right=reshape(mean(node_right,[1,2]),1,3);
-%     left=colorvalue(color_left,color_mid);
-%     right=colorvalue(color_right,color_mid);
-%     if left>t_color
-%         nodes{node_m,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
-%         if j==floor(node_n/2-1)
-%             edges(node_m,1)=node_mid-j;
-%             left_stop=j;
-%         end
-%     elseif ~left_stop
-%         edges(node_m,1)=node_mid-j;
-%         left_stop=j;
-%     end
-%     if right>t_color&&~right_stop
-%         nodes{node_m,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
-%         if j==floor(node_n/2-1)
-%             edges(node_m,2)=node_mid+j;
-%             right_stop=j;
-%         end
-%     elseif ~right_stop
-%         edges(node_m,2)=node_mid+j;
-%         right_stop=j;
-%     end
-% end
-% 
-% % imshow(cell2mat(nodes));
-% % 然后从下往上进行遍历
-% 
-% for i=1:node_m-1
-%     node=nodes{node_m-i,node_mid};
-%     node_left=nodes{node_m-i,node_mid-left_stop+1};
-%     node_right=nodes{node_m-i,node_mid+right_stop-1};
-%     %nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),10,10));
-%     %imshow(cell2mat(nodes));
-%     color_mid=reshape(mean(node,[1,2]),1,3);
-%     color_left=reshape(mean(node_left,[1,2]),1,3);
-%     color_right=reshape(mean(node_right,[1,2]),1,3);
-%     left=colorvalue(color_left,color_mid);
-%     right=colorvalue(color_right,color_mid);
-% 
-%     if left>t_color% 最左侧与中心相似，向左侧扩展
-%         while left>t_color && left_stop<node_n/2-1
-%             left_stop=left_stop+1;
-%             node_left=nodes{node_m-i,node_mid-left_stop+1};
-%             color_left=reshape(mean(node_left,[1,2]),1,3);
-%             left=colorvalue(color_left,color_mid);
-%         end
-%         nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-%         edges(node_m-i,1)=node_mid-left_stop+1;
-%     else% 最左侧与中心不相似，向右侧扩展
-%         while left<t_color && left_stop>0
-%             left_stop=left_stop-1;
-%             node_left=nodes{node_m-i,node_mid-left_stop+1};
-%             color_left=reshape(mean(node_left,[1,2]),1,3);
-%             left=colorvalue(color_left,color_mid);
-%         end
-%         nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-%         edges(node_m-i,1)=node_mid-left_stop+1;
-%     end
-% 
-%     if right>t_color% 最右侧与中心相似，向右侧扩展
-%         while right>t_color && right_stop<node_n/2
-%             right_stop=right_stop+1;
-%             node_right=nodes{node_m-i,node_mid+right_stop-1};
-%             color_right=reshape(mean(node_right,[1,2]),1,3);
-%             right=colorvalue(color_right,color_mid);
-%         end
-%         nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-%         edges(node_m-i,2)=node_mid+right_stop-1;
-%     else% 最右侧与中心不相似，向左侧扩展
-%         while right<t_color && right_stop>0
-%             right_stop=right_stop-1;
-%             node_right=nodes{node_m-i,node_mid+right_stop-1};
-%             color_right=reshape(mean(node_right,[1,2]),1,3);
-%             right=colorvalue(color_right,color_mid);
-%         end
-%         nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-%         edges(node_m-i,2)=node_mid+right_stop-1;
-%     end
-% end
-% 
-% % imshow(cell2mat(nodes));
+node=nodes{node_m,node_mid};
+color_mid=reshape(mean(node,[1,2]),1,3);
+for j=1:floor(node_n/2-1)
+    node_left=nodes{node_m,node_mid-j};
+    node_right=nodes{node_m,node_mid+j};
+    color_left=reshape(mean(node_left,[1,2]),1,3);
+    color_right=reshape(mean(node_right,[1,2]),1,3);
+    left=colorvalue(color_left,color_mid);
+    right=colorvalue(color_right,color_mid);
+    nodes{node_m,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
+    if left>t_color
+        nodes{node_m,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
+        if j==floor(node_n/2-1)
+            edges(node_m,1)=node_mid-j;
+            left_stop=j;
+        end
+    elseif ~left_stop
+        edges(node_m,1)=node_mid-j;
+        left_stop=j;
+    end
+    if right>t_color&&~right_stop
+        nodes{node_m,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
+        if j==floor(node_n/2-1)
+            edges(node_m,2)=node_mid+j;
+            right_stop=j;
+        end
+    elseif ~right_stop
+        edges(node_m,2)=node_mid+j;
+        right_stop=j;
+    end
+end
+
+% imshow(cell2mat(nodes));
+% 然后从下往上进行遍历
+
+for i=1:node_m-1
+    node=nodes{node_m-i,node_mid};
+    node_left=nodes{node_m-i,node_mid-left_stop+1};
+    node_right=nodes{node_m-i,node_mid+right_stop-1};
+    %nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),10,10));
+    %imshow(cell2mat(nodes));
+    color_mid=reshape(mean(node,[1,2]),1,3);
+    color_left=reshape(mean(node_left,[1,2]),1,3);
+    color_right=reshape(mean(node_right,[1,2]),1,3);
+    left=colorvalue(color_left,color_mid);
+    right=colorvalue(color_right,color_mid);
+
+    if left>t_color% 最左侧与中心相似，向左侧扩展
+        while left>t_color && left_stop<node_n/2-1
+            left_stop=left_stop+1;
+            node_left=nodes{node_m-i,node_mid-left_stop+1};
+            color_left=reshape(mean(node_left,[1,2]),1,3);
+            left=colorvalue(color_left,color_mid);
+        end
+        nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_m-i,1)=node_mid-left_stop+1;
+    else% 最左侧与中心不相似，向右侧扩展
+        while left<t_color && left_stop>0
+            left_stop=left_stop-1;
+            node_left=nodes{node_m-i,node_mid-left_stop+1};
+            color_left=reshape(mean(node_left,[1,2]),1,3);
+            left=colorvalue(color_left,color_mid);
+        end
+        nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_m-i,1)=node_mid-left_stop+1;
+    end
+
+    if right>t_color% 最右侧与中心相似，向右侧扩展
+        while right>t_color && right_stop<node_n/2
+            right_stop=right_stop+1;
+            node_right=nodes{node_m-i,node_mid+right_stop-1};
+            color_right=reshape(mean(node_right,[1,2]),1,3);
+            right=colorvalue(color_right,color_mid);
+        end
+        nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_m-i,2)=node_mid+right_stop-1;
+    else% 最右侧与中心不相似，向左侧扩展
+        while right<t_color && right_stop>0
+            right_stop=right_stop-1;
+            node_right=nodes{node_m-i,node_mid+right_stop-1};
+            color_right=reshape(mean(node_right,[1,2]),1,3);
+            right=colorvalue(color_right,color_mid);
+        end
+        nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_m-i,2)=node_mid+right_stop-1;
+    end
+end
+
+imshow(cell2mat(nodes));
 
 
 y=(1:node_m)';% y坐标以node最上边算
