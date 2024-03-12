@@ -15,7 +15,7 @@ depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
 node_last_row=cell(1, node_n);
 
-t_color=0.93;% 像素相似度的阈值
+t_color=0.99;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
 left_stop=0;
 right_stop=0;
@@ -69,7 +69,7 @@ for j=1:floor(node_n/2-1)
     left=colorvalue(color_left,color_mid);
     right=colorvalue(color_right,color_mid);
     nodes{node_m,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
-    if left>t_color
+    if left>t_color&&~left_stop
         nodes{node_m,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
         if j==floor(node_n/2-1)
             edges(node_m,1)=node_mid-j;
@@ -147,7 +147,7 @@ for i=1:node_m-1
     end
 end
 
-imshow(cell2mat(nodes));
+figure();imshow(cell2mat(nodes));title("邻域生长法检测结果");
 
 
 y=(1:node_m)';% y坐标以node最上边算
@@ -198,7 +198,7 @@ for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
 
-figure(1); imshow(resultImage);
+figure(); imshow(resultImage);
 end
 
 %% 计算像素相似程度，包含色彩相似和亮度相似

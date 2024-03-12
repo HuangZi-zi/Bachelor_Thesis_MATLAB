@@ -18,9 +18,9 @@
 
 img=imread("Resource\mainline.jpg");
 imggray=im2gray(img);
-imshowpair(img,imggray,"montage");
+% imshowpair(img,imggray,"montage");
 
-
+u_edge(img);
 %%
 % clear;
 % %img=imread("Resource\mwprinciple_webcam.png");
@@ -792,3 +792,38 @@ toc
 disp(['运行时间: ',num2str(toc)]);
 subplot 223;imshow(fil_xy_re);title("xy one-dimension filter");
 subplot 224;imshow(filted);title("two-dimensions filter");
+
+%% 对比sobel和canny算子
+img=imread("Resource\lena.png");
+img=im2gray(img);
+% subplot 221;imshow(img);title("origin");
+img=imnoise(img,'gaussian',0.002);
+img=imnoise(img,'salt & pepper',0.02);
+img=im2double(img);
+h=480;
+w=640;
+
+subplot 221;imshow(img);title("noise");
+% 中值滤波
+filter_size=5;
+% hist_eq_double = im2double(hist_eq);
+% x_dir=hist_eq_double(:)';
+% tic;
+x_dir=img(:)';
+fil_x=medfilt1(x_dir,filter_size);
+fil_x_re=reshape(fil_x,h,w)';
+y_dir=fil_x_re(:)';
+fil_xy=medfilt1(y_dir,filter_size);%2次1维中值0.03024628s
+fil_xy_re=reshape(fil_xy,w,h)';
+subplot 222;imshow(fil_xy_re);title("filtered");
+
+edgesobel = edge(fil_xy_re, 'sobel');
+edgecanny = edge(fil_xy_re, "canny");
+subplot 223;imshow(edgesobel);title("edge-Sobel");
+subplot 224;imshow(edgecanny);title("edge-Canny");
+
+%% 曲线测试情况
+img=imread("Resource\curl.jpg");
+% edge_img=u_edge(img);
+% u_line_hough(img,edge_img);
+u_plane_regiongrowing(img,img);

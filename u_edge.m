@@ -19,8 +19,8 @@ if channel == 3 && div == 1
     edgeGreen = edge(greenChannel, 'sobel');
     edgeBlue = edge(blueChannel, 'sobel');
     % Combine the three edge images into a single image
-    edgeImage = double(edgeRed+edgeGreen+edgeBlue) * 0.33;
-    edgeImage = imbinarize(edgeImage,0.5);
+    edgeImage = double(edgeRed+edgeGreen+edgeBlue);
+    edgeImage = imbinarize(edgeImage,0.9);
     
 %     figure;
 %     subplot 131 
@@ -57,7 +57,7 @@ img_edge=filted;
 
 figure;
 imshow(img_edge);
-title('Edges');
+title('边缘');
 end
 
 %% 适于对角线检测的Sobel算子
