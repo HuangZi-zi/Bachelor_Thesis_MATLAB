@@ -1,7 +1,7 @@
-function u_plane_regiongrowing(img_color, img_depth)
+function out=u_plane_regiongrowing(img_color, img_depth)
 
-% img_color=imcrop(img_color,[0,0,510,370]);
-% img_depth=imcrop(img_depth,[0,0,510,370]);
+img_color=imcrop(img_color,[0,0,510,370]);
+img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
 [M,N,channel]=size(img_color);
 % 720,1080
@@ -147,13 +147,13 @@ for i=1:node_m-1
     end
 end
 
-figure();imshow(cell2mat(nodes));title("邻域生长法检测结果");
-
+% figure();imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
 
 y=(1:node_m)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
+out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
 % 将深度图反投影到点云
 % [U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
 
@@ -163,7 +163,6 @@ indexl=(xl-1).*nodesize+y;
 indexr=(xr-1).*nodesize+y;
 zl=depth(indexl);
 zr=depth(indexr);
-
 
 
 % 在深度图上拟合，一行节点对应一条空间直线
@@ -198,7 +197,7 @@ for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
 
-figure(); imshow(resultImage);
+figure(1); imshow(resultImage);
 end
 
 %% 计算像素相似程度，包含色彩相似和亮度相似
