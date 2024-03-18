@@ -1,7 +1,7 @@
 function out=u_plane_regiongrowing(img_color, img_depth)
-
-img_color=imcrop(img_color,[0,0,510,370]);
-img_depth=imcrop(img_depth,[0,0,510,370]);
+% out=[y，xl，xr]
+% img_color=imcrop(img_color,[0,0,510,370]);
+% img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
 [M,N,channel]=size(img_color);
 % 720,1080
@@ -15,7 +15,7 @@ depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
 node_last_row=cell(1, node_n);
 
-t_color=0.99;% 像素相似度的阈值
+t_color=0.98;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
 left_stop=0;
 right_stop=0;
@@ -147,13 +147,14 @@ for i=1:node_m-1
     end
 end
 
-% figure();imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
+figure(1);imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
 
 y=(1:node_m)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
 out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
+out=[out((floor(node_m)/2:end),:)];
 % 将深度图反投影到点云
 % [U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
 
@@ -197,7 +198,7 @@ for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
 
-figure(1); imshow(resultImage);
+figure(2); imshow(resultImage);
 end
 
 %% 计算像素相似程度，包含色彩相似和亮度相似

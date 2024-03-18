@@ -17,6 +17,11 @@ color_width = 1920; color_height = 1080;
 depth = zeros(depth_height,depth_width,'uint16');
 depthColor = zeros(depth_height,depth_width,3,'uint8');
 
+k=[];% 键盘输入控制
+figure, h = imshow(depthColor,[]);
+title('Color2DephAligned (press q to exit)');
+set(gcf,'keypress','k=get(gcf,''currentchar'');'); % listen keypress
+
 while true
     % Get frames from Kinect and save them on underlying buffer
     validData = k2.updateData;
@@ -26,9 +31,16 @@ while true
     if validData
         % Copy data to Matlab matrices
         depth = k2.getDepth;
-        depthColor = k2.getAlignColor2Depth;               
-        u_plane_regiongrowing(depthColor,depth);
+        depthColor = k2.my_getAlignColor2Depth;
+        set(h,'CData',depthColor);
+        %u_plane_regiongrowing(depthColor,depth);
 
+    end
+    if ~isempty(k)
+        if strcmp(k,'q')
+            break
+        end
+        
     end
     pause(0.02)
 end

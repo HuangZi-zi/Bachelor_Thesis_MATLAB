@@ -827,3 +827,8 @@ img=imread("Resource\curl.jpg");
 % edge_img=u_edge(img);
 % u_line_hough(img,edge_img);
 u_plane_regiongrowing(img,img);
+
+%% 人工势场法
+img=imread("Resource\curl.jpg");
+edges=u_plane_regiongrowing(img,img);
+u_APF(img,edges);
