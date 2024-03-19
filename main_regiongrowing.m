@@ -22,6 +22,16 @@ figure, h = imshow(depthColor,[]);
 title('Color2DephAligned (press q to exit)');
 set(gcf,'keypress','k=get(gcf,''currentchar'');'); % listen keypress
 
+calib = k2.getDepthIntrinsics;
+d_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
+                         [calib.PrincipalPointX,calib.PrincipalPointY], ...
+                         [depth_height,depth_width]);% 深度相机内参
+k_int = [calib.RadialDistortionSecondOrder,calib.RadialDistortionFourthOrder,calib.RadialDistortionSixthOrder,0,0];
+calib = k2.getColorCalib;
+c_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
+                         [calib.PrincipalPointX,calib.PrincipalPointY], ...
+                         [color_height,color_width]);% 彩色相机内参
+
 while true
     % Get frames from Kinect and save them on underlying buffer
     validData = k2.updateData;
@@ -31,8 +41,14 @@ while true
     if validData
         % Copy data to Matlab matrices
         depth = k2.getDepth;
-        depthColor = k2.my_getAlignColor2Depth;
-        set(h,'CData',depthColor);
+        color = k2.getColor; 
+        [depth,~]=undistortImage(depth,d_int);
+        [color,~]=undistortImage(color,c_int);
+        color=imresize(color,[375,667]);
+        depthColor_d=imcrop(depth,[1 8 374 511]);
+        depthColor_c=imcrop(color,[1 89 374 511]);
+        imshowpair(depthColor_d,depthColor_c);
+        %set(h,'CData',depthColor);
         %u_plane_regiongrowing(depthColor,depth);
 
     end

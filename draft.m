@@ -832,3 +832,12 @@ u_plane_regiongrowing(img,img);
 img=imread("Resource\curl.jpg");
 edges=u_plane_regiongrowing(img,img);
 u_APF(img,edges);
+
+%% 深度与彩色对齐
+color=imread("Resource\snapc4.png");
+depth=imread("Resource\snapd4.png");
+color=imresize(color,[375,667]);
+depthColor_c=imcrop(color,[89 1 511 375]);
+depthColor_d=imcrop(depth,[1 8 511 374]);
+depthColor_c=im2gray(depthColor_c);
+imshowpair(depthColor_d,depthColor_c,"blend");
