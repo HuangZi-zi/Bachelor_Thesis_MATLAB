@@ -147,14 +147,14 @@ for i=1:node_m-1
     end
 end
 
-figure(1);imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
+% figure(1);imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
 
 y=(1:node_m)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
 out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
-out=[out((floor(node_m)/2:end),:)];
+out=[out((floor(node_m/2):end),:)];
 % 将深度图反投影到点云
 % [U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
 
@@ -198,7 +198,7 @@ for k=1:size(xy,1)
     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
 end
 
-figure(2); imshow(resultImage);
+% figure(2); imshow(resultImage);
 end
 
 %% 计算像素相似程度，包含色彩相似和亮度相似

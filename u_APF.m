@@ -1,4 +1,4 @@
-function u_APF(img,edges)
+function [out,dir]=u_APF(img,edges)
 % edges: [y，xl，xr]
 [h,w,channel]=size(img);
 n=2*size(edges,1);%障碍个数
@@ -60,8 +60,8 @@ goal(K,1)=Xsum(1,1);%把路径向量的最后一个点赋值为目标
 goal(K,2)=Xsum(1,2);
 
 %***********************************画出障碍，起点，目标，路径点*************************
-figure(3);imshow(img);
-hold on;
+% figure(3);imshow(img);
+% hold on;
 %画出路径
 X=goal(:,1);
 Y=goal(:,2);
@@ -71,6 +71,9 @@ Y=goal(:,2);
 
 x=Xsum(2:n+1,1);
 y=Xsum(2:n+1,2);
-plot(x,y,'o',X,Y,'.r');
 
+out=insertMarker(img,[x,y],'o','Color','green');
+out=insertMarker(out,[X,Y],'x-mark','Color','red');
+% plot(x,y,'o',X,Y,'.r');
+dir=(X(5)-floor(w/2))/(Y(5)-h);
 end

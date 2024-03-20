@@ -831,7 +831,9 @@ u_plane_regiongrowing(img,img);
 %% 人工势场法
 img=imread("Resource\curl.jpg");
 edges=u_plane_regiongrowing(img,img);
-u_APF(img,edges);
+[out,dir]=u_APF(img,edges);
+imshow(out);
+disp(dir);
 
 %% 深度与彩色对齐
 color=imread("Resource\snapc4.png");
