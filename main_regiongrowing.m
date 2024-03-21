@@ -41,7 +41,7 @@ u_QR_Serial(obj1);
 
 % 发送控制指令的端口
 clear obj2
-obj2=serialport("COM4",19200,'Timeout', 0.2);
+obj2=serialport("COM7",19200,'Timeout', 0.2);
 
 % 运行控制
 run_flag=0;
@@ -268,12 +268,12 @@ else
    
 
 
-    dv=fix(dir*20);
+    dv=fix(dir*100);
     vl=v+dv+32768;
     vr=v-dv;
     % 前进为左边反转，右边正转
     % fprintf("left:%d; right:%d\n",vl,vr)
-    % fprintf("dv:%d\n",dv)
+    fprintf("dv:%d\n",dv)
 %     fprintf("v:%d \n",v)
     vlhex=dec2hex(vl,4);
     vrhex=dec2hex(vr,4);

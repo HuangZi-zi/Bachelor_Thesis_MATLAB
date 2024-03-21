@@ -271,7 +271,7 @@ close all
 % Available sources: 'color', 'depth', 'infrared', 'body_index', 'body',
 % 'face' and 'HDface'
 k2 = Kin2('color','depth');
-i=20;
+i=30;
 % images sizes
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;
@@ -829,17 +829,21 @@ img=imread("Resource\curl.jpg");
 u_plane_regiongrowing(img,img);
 
 %% 人工势场法
-img=imread("Resource\curl.jpg");
+img=imread("Resource\snapc30.png");
 edges=u_plane_regiongrowing(img,img);
 [out,dir]=u_APF(img,edges);
 imshow(out);
 disp(dir);
 
 %% 深度与彩色对齐
-color=imread("Resource\snapc4.png");
-depth=imread("Resource\snapd4.png");
+color=imread("Resource\snapc30.png");
+depth=imread("Resource\snapd30.png");
 color=imresize(color,[375,667]);
-depthColor_c=imcrop(color,[89 1 511 375]);
-depthColor_d=imcrop(depth,[1 8 511 374]);
-depthColor_c=im2gray(depthColor_c);
-imshowpair(depthColor_d,depthColor_c,"blend");
+depthColor_c=fliplr(imcrop(color,[89 1 511 375]));
+depthColor_d=fliplr(imcrop(depth,[1 8 511 374]));
+% depthColor_c=im2gray(depthColor_c);
+% imshowpair(depthColor_d,depthColor_c,"blend");
+edges=u_plane_regiongrowing(depthColor_c,depthColor_d);
+[out,dir]=u_APF(depthColor_c,edges);
+imshow(out);
+disp(dir);

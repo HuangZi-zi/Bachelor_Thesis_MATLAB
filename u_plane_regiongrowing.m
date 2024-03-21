@@ -15,7 +15,7 @@ depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
 node_last_row=cell(1, node_n);
 
-t_color=0.98;% 像素相似度的阈值
+t_color=0.95;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
 left_stop=0;
 right_stop=0;
