@@ -268,7 +268,13 @@ else
    
 
 
-    dv=fix(dir*100);
+    dv=fix(-dir*100);
+    % 增加限幅
+    if dv>v
+        dv=v;
+    elseif dv<-v
+            dv=-v;
+    end
     vl=v+dv+32768;
     vr=v-dv;
     % 前进为左边反转，右边正转
