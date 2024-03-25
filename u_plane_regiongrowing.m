@@ -29,34 +29,39 @@ for i=1:node_m
 end
 
 
-% % 以节点颜色为类，对每一行进行聚类分析
-% for i=node_m:-1:1
-% row_temp=nodes(i,:);
-% image_array = cat(4, row_temp{:});
-% mean_colors = squeeze(mean(mean(image_array, 1), 2));
+% 以节点颜色为类，对最底部行进行聚类分析
+% node_last_row=nodes(node_m,:);% 取出最下面一行节点
+% image_array = cat(4, node_last_row{:});% 4维矩阵。装载这一行节点的三个通道。[node_size,node_size,channel,node_n]
+% mean_colors = squeeze(mean(mean(image_array, 1), 2));%装载了一行节点三个通道分别的平均值[channel, node_n]
 % 
-% line_top=img_depth(i*nodesize-9,:);
-% line_bottom=img_depth(i*nodesize,:);
-% reshaped_topline=reshape(line_top,nodesize,node_n);
-% reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
-% spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
+% % line_top=img_depth(i*nodesize-9,:);
+% % line_bottom=img_depth(i*nodesize,:);
+% % reshaped_topline=reshape(line_top,nodesize,node_n);
+% % reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
+% % spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
 % 
-% for j = 1:51    
-%     x = (1:nodesize)+(j-1)*nodesize;
-%     y_top = repmat(i*nodesize-9,[1,10]);
-%     y_bottom = repmat(i*nodesize,[1,10]);
-%     z_top = reshaped_topline(:, j);
-% 
-%     f_top = fit([x, y_top], z_top, spatial_line);
-%     f_bottom = fit([x, y_bottom], z_bottom, spatial_line);
-%     line_coefficients(:, i) = [f.a; f.b; f.c];
-% end
+% % for j = 1:51    
+% %     x = (1:nodesize)+(j-1)*nodesize;
+% %     y_top = repmat(i*nodesize-9,[1,10]);
+% %     y_bottom = repmat(i*nodesize,[1,10]);
+% %     z_top = reshaped_topline(:, j);
+% % 
+% %     f_top = fit([x, y_top], z_top, spatial_line);
+% %     f_bottom = fit([x, y_bottom], z_bottom, spatial_line);
+% %     line_coefficients(:, i) = [f.a; f.b; f.c];
+% % end
 % 
 % Z=linkage(mean_colors','average','chebychev');
 % %figure();dendrogram(Z);
-% c(i,:)=cluster(Z,'cutoff',50,'criterion','distance');
-% end
-% edge=gradient(c);
+% c=cluster(Z,'cutoff',50,'criterion','distance')';
+% c(c(:)~=1)=0;
+% idx = find(c);% 找出c中非零元素的index
+% idx_diff = diff(idx);% 在index中取微分
+% break_indices = find(idx_diff > 1);% 如果微分大于1，则说明不连续
+% edges(node_m,1) = [idx(1), idx(break_indices+1)];
+% left_stop=node_mid-edges(node_m,1);
+% edges(node_m,2) = [idx(break_indices), idx(end)];
+% right_stop=edges(node_m,2)-node_mid;
 
 % 历史版本：从最下面中间开始遍历，再逐行向上
 node=nodes{node_m,node_mid};

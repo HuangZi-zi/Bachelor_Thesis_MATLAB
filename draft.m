@@ -823,7 +823,7 @@ subplot 223;imshow(edgesobel);title("edge-Sobel");
 subplot 224;imshow(edgecanny);title("edge-Canny");
 
 %% 曲线测试情况
-img=imread("Resource\curl.jpg");
+img=imread("Resource\snapc25.png");
 % edge_img=u_edge(img);
 % u_line_hough(img,edge_img);
 u_plane_regiongrowing(img,img);
@@ -847,3 +847,59 @@ edges=u_plane_regiongrowing(depthColor_c,depthColor_d);
 [out,dir]=u_APF(depthColor_c,edges);
 figure(1);imshow(out);
 disp(dir);
+
+%% 新的邻域生长法编程
+color=imread("Resource\snapc30.png");
+depth=imread("Resource\snapd30.png");
+color=imresize(color,[375,667]);
+img_color=fliplr(imcrop(color,[89 1 511 375]));
+img_depth=fliplr(imcrop(depth,[1 8 511 374]));
+
+[height,width,channel]=size(img_color);
+% 720,1080
+nodesize=9;
+if rem(height,nodesize)% 如果不能整除，则进一步裁剪
+    img_color=imcrop(img_color,[1 1 width-1 nodesize*floor(height/nodesize)-1]);
+end
+if rem(width,nodesize)
+    img_color=imcrop(img_color,[1 1 nodesize*floor(width/nodesize)-1 height-1]);
+end
+[height,width,channel]=size(img_color);
+
+node_height=height/nodesize;
+node_width=width/nodesize;
+node_mid=floor(node_width/2);
+
+nodes=cell(node_height, node_width);% nodes
+depth=zeros(node_height, node_width);
+edges=ones(node_height,2).*node_mid;
+scan_lines=cell(node_height, node_width);
+% node_last_row=cell(1, node_n);
+
+% 划分为node
+if rem(nodesize,2) % nodesize为奇数，取中间1行
+    for i=1:node_height
+        for j=1:node_width
+            nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                 (j-1)*nodesize+1:min(j*nodesize,width),:);
+            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                      (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+            scan_lines{i,j}=[(j-1)*nodesize+1:j*nodesize;...
+                            repmat((i-1)*nodesize+1+floor(nodesize/2),1,nodesize);...
+                            img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize)];
+        end
+    end
+else % nodesize为偶数，取中间2行
+    for i=1:node_m
+        for j=1:node_n
+            nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N),:);
+            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N)),"all");
+            scan_lines{i,j}=[img_depth];
+        end
+    end
+end
+% 基本思想：以每个节点对应的空间直线以及节点颜色为标准，进行聚类分析。提取包含底部中间节点的类，生成边界用于导航。
+node_last_row=nodes(node_m,:);% 取出最下面一行节点
+spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, ...
+                       'independent', {'x', 'y'}, 'dependent', 'z');
+fit_spatial_line = fit(img_depth,spatial_line);

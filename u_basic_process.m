@@ -2,47 +2,58 @@ function output = u_basic_process(img)
 % 中值滤波与去除高光
 
 mid_filter_size=9;% 中值滤波器尺寸
-min_filter_size=199;% 最小值滤波器尺寸
+min_filter_size=9;% 最小值滤波器尺寸
+strength=0.15;% 去高光的程度
 [h,w,channel]=size(img);
 
 % img=im2double(img);
 
 
 % 利用最小值滤波得到高光遮罩，并去除高光
+gray_img=im2gray(img);
 R=img(:,:,1);
 G=img(:,:,2);
 B=img(:,:,3);
-min_R = ordfilt2(R,1,ones(min_filter_size,min_filter_size));
-min_G = ordfilt2(G,1,ones(min_filter_size,min_filter_size));
-min_B = ordfilt2(B,1,ones(min_filter_size,min_filter_size));
+% min_R = ordfilt2(R,1,ones(min_filter_size,min_filter_size));
+% min_G = ordfilt2(G,1,ones(min_filter_size,min_filter_size));
+% min_B = ordfilt2(B,1,ones(min_filter_size,min_filter_size));
+min_fil=ordfilt2(gray_img,1,ones(min_filter_size,min_filter_size));
 
-
-ave_R=mean(min_R,"all");
-ave_G=mean(min_G,"all");
-ave_B=mean(min_B,"all");
+% ave_R=mean(min_R,"all");
+% ave_G=mean(min_G,"all");
+% ave_B=mean(min_B,"all");
 % ave=(ave_R+ave_G+ave_B)/3;
 
-min_R(min_R(:)<ave_R)=0;
-min_G(min_G(:)<ave_G)=0;
-min_B(min_B(:)<ave_B)=0;
+% min_R(min_R(:)<200)=0;
+% min_G(min_G(:)<200)=0;
+% min_B(min_B(:)<200)=0;
 
-mask_R = imerode(R,strel('square',35));
-imshow(mask_R);
-% 
+% mask_R = imdilate(min_R,strel('disk',5));
+% mask_G = imdilate(min_G,strel('disk',5));
+% mask_B = imdilate(min_B,strel('disk',5));
+% mask_R(mask_R(:)<200)=0;
+% mask_G(mask_G(:)<200)=0;
+% mask_B(mask_B(:)<200)=0;
+mask=imdilate(min_fil,strel('disk',7));
+% mask=imerode(min_fil,strel('disk',7));
+mask(mask(:)<210)=0;
+mask=imdilate(mask,strel('disk',7));
+% figure();imshow(mask);
+% R1=R-0.2.*mask_R;
+% G1=R-0.2.*mask_G;
+% B1=R-0.2.*mask_B;
+% gray_img1=gray_img-0.2.*mask;
+
 % % figure();imshow(min_R);
 % 
-% R1=R-floor(1.*min_R);
-% G1=G-floor(1.*min_G);
-% B1=B-floor(1.*min_B);
-% 
-% % R1=R;
-% % G1=G;
-% % B1=B;
-% 
-% img1(:,:,1)=R1;
-% img1(:,:,2)=G1;
-% img1(:,:,3)=B1;
-% img1=im2double(img1);
+R1=R-floor(strength.*mask);
+G1=G-floor(strength.*mask);
+B1=B-floor(strength.*mask);
+
+img1(:,:,1)=R1;
+img1(:,:,2)=G1;
+img1(:,:,3)=B1;
+img1=im2double(img1);
 % imshow(im2uint8(img1));
  
 
@@ -108,10 +119,10 @@ img=im2uint8(fil_xy_re);
 % subplot 211;
 % imshow(fil_x_re');
 % subplot 212;
-imshow(img);
+% figure();imshow(img);
 
 
 % output=fil_xy_re;
-output=0;
+output=img;
 
 end
