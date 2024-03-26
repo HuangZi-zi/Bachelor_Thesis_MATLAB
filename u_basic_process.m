@@ -8,7 +8,7 @@ strength=0.15;% 去高光的程度
 
 % img=im2double(img);
 
-
+if channel==3 %彩色图，去高光+中值滤波
 % 利用最小值滤波得到高光遮罩，并去除高光
 gray_img=im2gray(img);
 R=img(:,:,1);
@@ -125,4 +125,16 @@ img=im2uint8(fil_xy_re);
 % output=fil_xy_re;
 output=img;
 
+elseif channel==1 % 深度图，孔洞填充+中值滤波
+    img1=im2double(img);
+    % 中值滤波
+    x_dir=img1(:)';
+    fil_x=medfilt1(x_dir,mid_filter_size);
+    fil_x_re=pagetranspose(reshape(fil_x,h,w,channel));
+    y_dir=fil_x_re(:)';
+    fil_xy=medfilt1(y_dir,mid_filter_size);
+    fil_xy_re=pagetranspose(reshape(fil_xy,w,h,channel));
+    img=im2uint16(fil_xy_re);
+    output=img;
+end
 end

@@ -3,9 +3,18 @@ function out=u_plane_regiongrowing(img_color, img_depth)
 % img_color=imcrop(img_color,[0,0,510,370]);
 % img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
-[M,N,channel]=size(img_color);
-% 720,1080
-nodesize=10;
+
+[height,width,channel]=size(img_color);
+nodesize=9;
+if rem(height,nodesize)% 如果不能整除，则进一步裁剪
+    img_color=imcrop(img_color,[1 1 width-1 nodesize*floor(height/nodesize)-1]);
+end
+if rem(width,nodesize)
+    img_color=imcrop(img_color,[1 1 nodesize*floor(width/nodesize)-1 height-1]);
+end
+[height,width,channel]=size(img_color);
+M=height;
+N=width;
 node_m=floor(M/nodesize);
 node_n=floor(N/nodesize);
 node_mid=floor(node_n/2);
@@ -21,13 +30,32 @@ left_stop=0;
 right_stop=0;
 
 % 划分为node
-for i=1:node_m
-    for j=1:node_n
-        nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N),:);
-        depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,M),(j-1)*nodesize+1:min(j*nodesize,N)),"all");
+if rem(nodesize,2) % nodesize为奇数，取中间1行
+    for i=1:node_height
+        for j=1:node_width
+            nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                 (j-1)*nodesize+1:min(j*nodesize,width),:);
+            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                      (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+            scan_lines{i,j}=[(j-1)*nodesize+1:j*nodesize;...
+                            repmat((i-1)*nodesize+1+floor(nodesize/2),1,nodesize);...
+                            img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize)];
+%             fit_spatial_line = fit(scan_lines{i,j}(1:2,:)',scan_lines{i,j}(3,:)',spatial_line);
+        end
+    end
+else % nodesize为偶数，取中间2行
+    for i=1:node_height
+        for j=1:node_width
+            nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                 (j-1)*nodesize+1:min(j*nodesize,width),:);
+            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+                                      (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+            scan_lines{i,j}=[(j-1)*nodesize+1:j*nodesize,(j-1)*nodesize+1:j*nodesize;...
+                            repmat((i-1)*nodesize+floor(nodesize/2),1,nodesize),repmat((i-1)*nodesize+1+floor(nodesize/2),1,nodesize);...
+                            img_depth((i-1)*nodesize+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize),img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize)];
+        end
     end
 end
-
 
 % 以节点颜色为类，对最底部行进行聚类分析
 % node_last_row=nodes(node_m,:);% 取出最下面一行节点
@@ -165,7 +193,7 @@ xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
 out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
-out=[out((floor(node_m/2):end),:)];
+out=out(((end-10):end),:);
 % 将深度图反投影到点云
 % [U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
 
@@ -176,6 +204,7 @@ indexr=(xr-1).*nodesize+y;
 zl=depth(indexl);
 zr=depth(indexr);
 
+% 在深度图上检验对应的区域是否为平面
 
 % 在深度图上拟合，一行节点对应一条空间直线
 a=(zl-zr)./(xl-xr);
