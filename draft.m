@@ -271,7 +271,7 @@ close all
 % Available sources: 'color', 'depth', 'infrared', 'body_index', 'body',
 % 'face' and 'HDface'
 k2 = Kin2('color','depth');
-i=30;
+i=40;
 % images sizes
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;
@@ -849,12 +849,11 @@ figure(1);imshow(out);
 disp(dir);
 
 %% 新的平面提取法编程
-color=imread("Resource\snapc22.png");
-depth=imread("Resource\snapd22.png");
+color=imread("Resource\snapc41.png");
+depth=imread("Resource\snapd41.png");
 color=imresize(color,[375,667]);
-img_color=fliplr(imcrop(color,[89 1 511 375]));
+img_color=fliplr(imcrop(color,[89 1 511 374]));
 img_depth=fliplr(imcrop(depth,[1 8 511 374]));
-
 
 t_color=0.90;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
@@ -1040,11 +1039,26 @@ for i=node_height:-1:1 % 根据空间特性重新定义边界
         end
     end
 end
+
+barrier=img_depth;
+barrier(barrier(:)>10000)=0;
+barrier=imbinarize(barrier);
+barrier(floor(height/3):end,:)=0;
+imshow(barrier);
+[~, cols] = find(barrier);
+
+% Find the leftmost and rightmost points
+leftmost_point = min(cols);
+rightmost_point = max(cols);
+barrier_point_x=leftmost_point:nodesize:rightmost_point;
+barrier_point_y=repmat((node_height-3).*nodesize+6,1,size(barrier_point_x,2));
 y=(1:node_height)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
 out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
+out=out(((end-10):end),:);
+out=union(out,[barrier_point_y',barrier_point_x',barrier_point_x'],"rows");
 figure(2);imshow(u_APF(img_color,out));
 % %figure();dendrogram(Z);
 % c=cluster(Z,'cutoff',50,'criterion','distance')';

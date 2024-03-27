@@ -1,18 +1,11 @@
-function out=u_plane_regiongrowing(img_color, img_depth)
+function out=u_plane_regiongrowing(img_color, img_depth,nodesize)
 % out=[y，xl，xr]
 % img_color=imcrop(img_color,[0,0,510,370]);
 % img_depth=imcrop(img_depth,[0,0,510,370]);
 % figure; imshow(img_color);
 
 [height,width,channel]=size(img_color);
-nodesize=9;
-if rem(height,nodesize)% 如果不能整除，则进一步裁剪
-    img_color=imcrop(img_color,[1 1 width-1 nodesize*floor(height/nodesize)-1]);
-end
-if rem(width,nodesize)
-    img_color=imcrop(img_color,[1 1 nodesize*floor(width/nodesize)-1 height-1]);
-end
-[height,width,channel]=size(img_color);
+
 M=height;
 N=width;
 node_m=floor(M/nodesize);
@@ -185,26 +178,34 @@ for i=1:node_m-1
     end
 %     imshow(cell2mat(nodes));
 end
-
 % figure(2);imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
-
-y=(1:node_m)';% y坐标以node最上边算
+y=(1:node_height)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
-out=[(y-1).*nodesize+6,(xl-1).*nodesize+6,(xr-1).*nodesize+6];
-out=out(((end-10):end),:);
-% 将深度图反投影到点云
-% [U,V,cloud_array]=projectPointCloud(X_t, Y_t, d_img, fx_rgb, fy_rgb, cx_rgb, cy_rgb, t_stereo(3));
+% 避障算法
+barrier=img_depth;
+barrier(barrier(:)>10000)=0;
+barrier=imbinarize(barrier);
+barrier(floor(height/3):end,:)=0;
+% imshow(barrier);
+[~, cols] = find(barrier);
+leftmost_point = min(cols);
+rightmost_point = max(cols);
+barrier_point_x=leftmost_point:nodesize:rightmost_point;
+barrier_point_y=repmat((node_height-3).*nodesize+6,1,size(barrier_point_x,2));
 
-% x=[xl;xr];
-% y=repmat(y,2,1);
+out=[(y-1).*nodesize+1+floor(nodesize/2),(xl-1).*nodesize+1+floor(nodesize/2),(xr-1).*nodesize+1+floor(nodesize/2)];
+out=out(((end-10):end),:);
+out=union(out,[barrier_point_y',barrier_point_x',barrier_point_x'],"rows");
+
+
+% 在深度图上检验对应的区域是否为平面
 indexl=(xl-1).*nodesize+y;
 indexr=(xr-1).*nodesize+y;
 zl=depth(indexl);
 zr=depth(indexr);
 
-% 在深度图上检验对应的区域是否为平面
 
 % 在深度图上拟合，一行节点对应一条空间直线
 a=(zl-zr)./(xl-xr);
@@ -239,6 +240,9 @@ for k=1:size(xy,1)
 end
 
 % figure(2); imshow(resultImage);
+
+% 检查深度图是否存在障碍，如果存在，则将障碍物添加进边界信息中。
+
 end
 
 %% 计算像素相似程度，包含色彩相似和亮度相似

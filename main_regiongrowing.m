@@ -48,6 +48,19 @@ run_flag=0;
 run_pos=[];
 run_des=[];
 v=200;
+
+% 节点大小与确认裁剪的尺寸问题
+nodesize=9;
+height_cd=375;
+width_cd=512;
+if rem(height_cd,nodesize)% 如果不能整除，则进一步裁剪
+    %     width_cd=width_cd;
+    height_cd=nodesize*floor(height_cd/nodesize);
+end
+if rem(width_cd,nodesize)
+    width_cd = nodesize*floor(width_cd/nodesize)-1;
+end
+
 % 在没有运行指令时停止等待
 while(size(obj1.UserData,2)~=6) %没有收到指令
     pause(0.1);%等待
@@ -82,13 +95,13 @@ while(1)
         end
         obj1.UserData=[];
         if (run_flag==1)
-            sendcomm_run(k2,obj2,v,run_des,run_pos);
+            sendcomm_run(k2,obj2,v,run_des,run_pos,width_cd,height_cd,nodesize);
         end
     elseif size(obj1.UserData,2)>6
         fprintf("Wrong Communication!\n");
         obj1.UserData=[];
     else
-        sendcomm_run(k2,obj2,v,run_des,run_pos);
+        sendcomm_run(k2,obj2,v,run_des,run_pos,width_cd,height_cd,nodesize);
     end
 end
 
@@ -153,7 +166,7 @@ function sendcomm_spin(port,dir,time)
 end
 
 %% 运行函数
-function sendcomm_run(k2,port,v,dst,pos)
+function sendcomm_run(k2,port,v,dst,pos,width_cd,height_cd,nodesize)
 if(dst==pos)
     sendcomm_stop;
 else
@@ -168,13 +181,14 @@ else
 %         [depth,~]=undistortImage(depth,d_int);
 %         [color,~]=undistortImage(color,c_int);
         color=imresize(color,[375,667]);
-        
-        depthColor_c=fliplr(imcrop(color,[89 1 511 375]));
+
+        depthColor_c=fliplr(imcrop(color,[89 1 width_cd-1 height_cd-1]));
         depthColor_c=u_basic_process(depthColor_c);
-        depthColor_d=fliplr(imcrop(depth,[1 8 511 374]));
+        depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
+
         %imshowpair(depthColor_d,depthColor_c);
         % 
-        edges=u_plane_regiongrowing(depthColor_c,depthColor_d);
+        edges=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize);
         [out,dir]=u_APF(depthColor_c,edges);
         figure(1);imshow(out);
 %         set(h,'CData',out);

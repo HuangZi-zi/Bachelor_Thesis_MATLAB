@@ -55,7 +55,7 @@ img1(:,:,2)=G1;
 img1(:,:,3)=B1;
 img1=im2double(img1);
 % imshow(im2uint8(img1));
- 
+
 
 % % 用非线性变换解决高光
 % img=im2double(img);
