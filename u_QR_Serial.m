@@ -62,7 +62,7 @@ function readSerialData(src,~)
     data = fread(src,1);
     src.UserData(end+1) = data;
     %src.UserData.Count = src.UserData.Count + 1;
-    disp(data);   
+%     disp(data);   
     
 end
 

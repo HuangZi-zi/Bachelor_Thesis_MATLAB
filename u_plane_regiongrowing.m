@@ -8,10 +8,12 @@ function out=u_plane_regiongrowing(img_color, img_depth,nodesize)
 
 M=height;
 N=width;
-node_m=floor(M/nodesize);
-node_n=floor(N/nodesize);
-node_mid=floor(node_n/2);
+node_height=floor(M/nodesize);
+node_width=floor(N/nodesize);
+node_mid=floor(node_width/2);
 
+node_m=node_height;
+node_n=node_width;
 nodes=cell(node_m, node_n);% nodes
 depth=zeros(node_m, node_n);
 edges=ones(node_m,2).*node_mid;
@@ -188,7 +190,8 @@ barrier=img_depth;
 barrier(barrier(:)>10000)=0;
 barrier=imbinarize(barrier);
 barrier(floor(height/3):end,:)=0;
-% imshow(barrier);
+% barrier=imerode(barrier,strel('disk',5));
+% figure(3);imshow(barrier);
 [~, cols] = find(barrier);
 leftmost_point = min(cols);
 rightmost_point = max(cols);
@@ -200,44 +203,44 @@ out=out(((end-10):end),:);
 out=union(out,[barrier_point_y',barrier_point_x',barrier_point_x'],"rows");
 
 
-% 在深度图上检验对应的区域是否为平面
-indexl=(xl-1).*nodesize+y;
-indexr=(xr-1).*nodesize+y;
-zl=depth(indexl);
-zr=depth(indexr);
-
-
-% 在深度图上拟合，一行节点对应一条空间直线
-a=(zl-zr)./(xl-xr);
-b=zl-a.*xl;
-
-% 尝试合并节点，如果相邻的空间直线参数类似，则可以合并对应的节点
-xy=[];
-firstmerge=1;
-for k=2:node_m-1
-    m1=[a(k-1),-1];
-    m2=[a(k),-1];
-    m3=[a(k+1),-1];
-    n1=[b(k+1)-b(k),-1];
-    n2=[b(k)-b(k-1),-1];
-    n3=[(b(k+1)-b(k-1))./2,-1];
-    sum_m=dot(m1,m2)/(norm(m1)*norm(m2))+dot(m1,m3)/(norm(m1)*norm(m3))+dot(m2,m3)/(norm(m2)*norm(m3));
-    sum_n=dot(n1,n2)/(norm(n1)*norm(n2))+dot(n1,n3)/(norm(n1)*norm(n3))+dot(n2,n3)/(norm(n2)*norm(n3));
-    measure(k)=(sum_m+sum_n)/6+0.5;
-    if firstmerge && measure(k)>t_merge 
-        merged(k)=1;
-        xy=[xl(k-1),y(k-1),xr(k-1),y(k-1);xl(k),y(k),xr(k),y(k);xl(k+1),y(k+1),xr(k+1),y(k+1)];
-        firstmerge=0;
-    elseif measure(k)>t_merge && ~firstmerge
-        merged(k)=1;
-        xy=union(xy,[xl(k-1),y(k-1),xr(k-1),y(k-1);xl(k),y(k),xr(k),y(k);xl(k+1),y(k+1),xr(k+1),y(k+1)],"rows");
-    end
-end
-xy=(xy-1).*nodesize+1;
-resultImage=img_color;
-for k=1:size(xy,1)
-    resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
-end
+% % 在深度图上检验对应的区域是否为平面
+% indexl=(xl-1).*nodesize+y;
+% indexr=(xr-1).*nodesize+y;
+% zl=depth(indexl);
+% zr=depth(indexr);
+% 
+% 
+% % 在深度图上拟合，一行节点对应一条空间直线
+% a=(zl-zr)./(xl-xr);
+% b=zl-a.*xl;
+% 
+% % 尝试合并节点，如果相邻的空间直线参数类似，则可以合并对应的节点
+% xy=[];
+% firstmerge=1;
+% for k=2:node_m-1
+%     m1=[a(k-1),-1];
+%     m2=[a(k),-1];
+%     m3=[a(k+1),-1];
+%     n1=[b(k+1)-b(k),-1];
+%     n2=[b(k)-b(k-1),-1];
+%     n3=[(b(k+1)-b(k-1))./2,-1];
+%     sum_m=dot(m1,m2)/(norm(m1)*norm(m2))+dot(m1,m3)/(norm(m1)*norm(m3))+dot(m2,m3)/(norm(m2)*norm(m3));
+%     sum_n=dot(n1,n2)/(norm(n1)*norm(n2))+dot(n1,n3)/(norm(n1)*norm(n3))+dot(n2,n3)/(norm(n2)*norm(n3));
+%     measure(k)=(sum_m+sum_n)/6+0.5;
+%     if firstmerge && measure(k)>t_merge 
+%         merged(k)=1;
+%         xy=[xl(k-1),y(k-1),xr(k-1),y(k-1);xl(k),y(k),xr(k),y(k);xl(k+1),y(k+1),xr(k+1),y(k+1)];
+%         firstmerge=0;
+%     elseif measure(k)>t_merge && ~firstmerge
+%         merged(k)=1;
+%         xy=union(xy,[xl(k-1),y(k-1),xr(k-1),y(k-1);xl(k),y(k),xr(k),y(k);xl(k+1),y(k+1),xr(k+1),y(k+1)],"rows");
+%     end
+% end
+% xy=(xy-1).*nodesize+1;
+% resultImage=img_color;
+% for k=1:size(xy,1)
+%     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
+% end
 
 % figure(2); imshow(resultImage);
 

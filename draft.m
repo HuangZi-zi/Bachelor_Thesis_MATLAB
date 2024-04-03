@@ -843,10 +843,10 @@ depthColor_c=fliplr(imcrop(color,[89 1 511 375]));
 depthColor_d=fliplr(imcrop(depth,[1 8 511 374]));
 % depthColor_c=im2gray(depthColor_c);
 % imshowpair(depthColor_d,depthColor_c,"blend");
-edges=u_plane_regiongrowing(depthColor_c,depthColor_d);
-[out,dir]=u_APF(depthColor_c,edges);
-figure(1);imshow(out);
-disp(dir);
+% edges=u_plane_regiongrowing(depthColor_c,depthColor_d);
+% [out,dir]=u_APF(depthColor_c,edges);
+% figure(1);imshow(out);
+% disp(dir);
 
 %% 新的平面提取法编程
 color=imread("Resource\snapc41.png");
