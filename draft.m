@@ -848,6 +848,7 @@ depthColor_d=fliplr(imcrop(depth,[1 8 511 374]));
 % figure(1);imshow(out);
 % disp(dir);
 
+
 %% 新的平面提取法编程
 color=imread("Resource\snapc41.png");
 depth=imread("Resource\snapd41.png");

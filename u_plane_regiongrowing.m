@@ -1,23 +1,17 @@
-function out=u_plane_regiongrowing(img_color, img_depth,nodesize)
-% out=[y，xl，xr]
-% img_color=imcrop(img_color,[0,0,510,370]);
-% img_depth=imcrop(img_depth,[0,0,510,370]);
-% figure; imshow(img_color);
+function out=u_plane_regiongrowing(img_color, img_depth,nodesize,core)
 
 [height,width,channel]=size(img_color);
 
-M=height;
-N=width;
-node_height=floor(M/nodesize);
-node_width=floor(N/nodesize);
+node_height=floor(height/nodesize);
+node_width=floor(width/nodesize);
 node_mid=floor(node_width/2);
 
-node_m=node_height;
-node_n=node_width;
-nodes=cell(node_m, node_n);% nodes
-depth=zeros(node_m, node_n);
-edges=ones(node_m,2).*node_mid;
-node_last_row=cell(1, node_n);
+
+nodes=cell(node_height, node_width);% nodes
+% depth=zeros(node_height, node_width);
+edges=ones(node_height,2).*node_mid;
+% node_last_row=cell(1, node_width);
+scan_lines=cell(node_height, node_width);
 
 t_color=0.90;% 像素相似度的阈值
 t_merge=0.8;% 直线相似度的阈值
@@ -30,11 +24,12 @@ if rem(nodesize,2) % nodesize为奇数，取中间1行
         for j=1:node_width
             nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
                                  (j-1)*nodesize+1:min(j*nodesize,width),:);
-            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
-                                      (j-1)*nodesize+1:min(j*nodesize,width)),"all");
-            scan_lines{i,j}=[(j-1)*nodesize+1:j*nodesize;...
-                            repmat((i-1)*nodesize+1+floor(nodesize/2),1,nodesize);...
-                            img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize)];
+%             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+%                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+            scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2;...
+                            (i-1)*nodesize+1+floor(nodesize/2),(i-1)*nodesize+1+floor(nodesize/2);...
+                            img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+3),...
+                            img_depth((i-1)*nodesize+1+floor(nodesize/2),j*nodesize-2)];
 %             fit_spatial_line = fit(scan_lines{i,j}(1:2,:)',scan_lines{i,j}(3,:)',spatial_line);
         end
     end
@@ -43,24 +38,25 @@ else % nodesize为偶数，取中间2行
         for j=1:node_width
             nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
                                  (j-1)*nodesize+1:min(j*nodesize,width),:);
-            depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
-                                      (j-1)*nodesize+1:min(j*nodesize,width)),"all");
-            scan_lines{i,j}=[(j-1)*nodesize+1:j*nodesize,(j-1)*nodesize+1:j*nodesize;...
-                            repmat((i-1)*nodesize+floor(nodesize/2),1,nodesize),repmat((i-1)*nodesize+1+floor(nodesize/2),1,nodesize);...
-                            img_depth((i-1)*nodesize+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize),img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+1:j*nodesize)];
+%             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+%                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+            scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2,(j-1)*nodesize+3,j*nodesize-2;... %x
+                             (i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2+1,(i-1)*nodesize+nodesize/2+1;... %y
+                             img_depth((i-1)*nodesize+nodesize/2,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2,j*nodesize-2),...%z
+                             img_depth((i-1)*nodesize+nodesize/2+1,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2+1,j*nodesize-2)];
         end
     end
 end
 
 % 以节点颜色为类，对最底部行进行聚类分析
 % node_last_row=nodes(node_m,:);% 取出最下面一行节点
-% image_array = cat(4, node_last_row{:});% 4维矩阵。装载这一行节点的三个通道。[node_size,node_size,channel,node_n]
-% mean_colors = squeeze(mean(mean(image_array, 1), 2));%装载了一行节点三个通道分别的平均值[channel, node_n]
+% image_array = cat(4, node_last_row{:});% 4维矩阵。装载这一行节点的三个通道。[node_size,node_size,channel,node_width]
+% mean_colors = squeeze(mean(mean(image_array, 1), 2));%装载了一行节点三个通道分别的平均值[channel, node_width]
 % 
 % % line_top=img_depth(i*nodesize-9,:);
 % % line_bottom=img_depth(i*nodesize,:);
-% % reshaped_topline=reshape(line_top,nodesize,node_n);
-% % reshaoed_bottomline=reshape(line_bottom,nodesize,node_n);
+% % reshaped_topline=reshape(line_top,nodesize,node_width);
+% % reshaoed_bottomline=reshape(line_bottom,nodesize,node_width);
 % % spatial_line = fittype('a*x + b*y + c', 'coefficients', {'a', 'b', 'c'}, 'independent', {'x', 'y'}, 'dependent', 'z');
 % 
 % % for j = 1:51    
@@ -87,35 +83,35 @@ end
 % right_stop=edges(node_m,2)-node_mid;
 
 % 历史版本：从最下面中间开始遍历，再逐行向上
-node=nodes{node_m,node_mid};
+node=nodes{node_height,node_mid};
 color_mid=reshape(mean(node,[1,2]),1,3);
-for j=1:floor(node_n/2-1)
-    node_left=nodes{node_m,node_mid-j};
-    node_right=nodes{node_m,node_mid+j};
+for j=1:floor(node_width/2-1)
+    node_left=nodes{node_height,node_mid-j};
+    node_right=nodes{node_height,node_mid+j};
     color_left=reshape(mean(node_left,[1,2]),1,3);
     color_right=reshape(mean(node_right,[1,2]),1,3);
     left=colorvalue(color_left,color_mid);
     right=colorvalue(color_right,color_mid);
-    nodes{node_m,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
+    nodes{node_height,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
     if left>t_color&&~left_stop %色彩相似且没有停止，向左生长
-        nodes{node_m,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给左边生长出的节点上色
-        if j==floor(node_n/2-1)% 到达边界，停止
+        nodes{node_height,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给左边生长出的节点上色
+        if j==floor(node_width/2-1)% 到达边界，停止
             left_stop=j;
-            edges(node_m,1)=node_mid-left_stop;
+            edges(node_height,1)=node_mid-left_stop;
         end
     elseif left<=t_color&&~left_stop %色彩不相似且没有停止，停止生长
         left_stop=j;
-        edges(node_m,1)=node_mid-left_stop;
+        edges(node_height,1)=node_mid-left_stop;
     end
     if right>t_color&&~right_stop
-        nodes{node_m,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
-        if j==floor(node_n/2-1)
+        nodes{node_height,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
+        if j==floor(node_width/2-1)
             right_stop=j;
-            edges(node_m,2)=node_mid+right_stop;
+            edges(node_height,2)=node_mid+right_stop;
         end
     elseif right<=t_color&&~right_stop
         right_stop=j;
-        edges(node_m,2)=node_mid+right_stop;
+        edges(node_height,2)=node_mid+right_stop;
     end
 end
 % 底部一行可视化
@@ -124,12 +120,12 @@ end
 
 
 % 然后从下往上进行遍历
-for i=1:node_m-1
-%     new_mid=floor((edges(node_m,1)+edges(node_m,2))/2);% 以下方一行的中间作为中间
-%     node=nodes{node_m-i,new_mid};
-    node=nodes{node_m-i,node_mid};
-    node_left=nodes{node_m-i,node_mid-left_stop};% 向上生长一格
-    node_right=nodes{node_m-i,node_mid+right_stop};
+for i=1:node_height-1
+%     new_mid=floor((edges(node_height,1)+edges(node_height,2))/2);% 以下方一行的中间作为中间
+%     node=nodes{node_height-i,new_mid};
+    node=nodes{node_height-i,node_mid};
+    node_left=nodes{node_height-i,node_mid-left_stop};% 向上生长一格
+    node_right=nodes{node_height-i,node_mid+right_stop};
 %     nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),10,10));
 %     nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,0,255],1,1,3),10,10));
 %     imshow(cell2mat(nodes));
@@ -140,43 +136,43 @@ for i=1:node_m-1
     right=colorvalue(color_right,color_mid);
 
     if left>t_color% 最左侧与中心相似，向左侧生长
-        while left>t_color && left_stop<floor(node_n/2-1)
+        while left>t_color && left_stop<floor(node_width/2-1)
             left_stop=left_stop+1;
-            node_left=nodes{node_m-i,node_mid-left_stop};
+            node_left=nodes{node_height-i,node_mid-left_stop};
             color_left=reshape(mean(node_left,[1,2]),1,3);
             left=colorvalue(color_left,color_mid);
         end
-        nodes{node_m-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,0,255],1,1,3),nodesize,nodesize));
-        edges(node_m-i,1)=node_mid-left_stop+1;
+        nodes{node_height-i,node_mid-left_stop+1}=uint8(repmat(reshape([0,0,255],1,1,3),nodesize,nodesize));
+        edges(node_height-i,1)=node_mid-left_stop+1;
     else% 最左侧与中心不相似，向右侧生长
         while left<t_color && left_stop>0
             left_stop=left_stop-1;
-            node_left=nodes{node_m-i,node_mid-left_stop};
+            node_left=nodes{node_height-i,node_mid-left_stop};
             color_left=reshape(mean(node_left,[1,2]),1,3);
             left=colorvalue(color_left,color_mid);
         end
-        nodes{node_m-i,node_mid-left_stop-1}=uint8(repmat(reshape([0,0,255],1,1,3),nodesize,nodesize));
-        edges(node_m-i,1)=node_mid-left_stop-1;
+        nodes{node_height-i,node_mid-left_stop-1}=uint8(repmat(reshape([0,0,255],1,1,3),nodesize,nodesize));
+        edges(node_height-i,1)=node_mid-left_stop-1;
     end
 
     if right>t_color% 最右侧与中心相似，向右侧生长
-        while right>t_color && right_stop<floor(node_n/2)
+        while right>t_color && right_stop<floor(node_width/2)
             right_stop=right_stop+1;
-            node_right=nodes{node_m-i,node_mid+right_stop};
+            node_right=nodes{node_height-i,node_mid+right_stop};
             color_right=reshape(mean(node_right,[1,2]),1,3);
             right=colorvalue(color_right,color_mid);
         end
-        nodes{node_m-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-        edges(node_m-i,2)=node_mid+right_stop-1;
+        nodes{node_height-i,node_mid+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_height-i,2)=node_mid+right_stop-1;
     else% 最右侧与中心不相似，向左侧扩展
         while right<t_color && right_stop>0
             right_stop=right_stop-1;
-            node_right=nodes{node_m-i,node_mid+right_stop};
+            node_right=nodes{node_height-i,node_mid+right_stop};
             color_right=reshape(mean(node_right,[1,2]),1,3);
             right=colorvalue(color_right,color_mid);
         end
-        nodes{node_m-i,node_mid+right_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-        edges(node_m-i,2)=node_mid+right_stop+1;
+        nodes{node_height-i,node_mid+right_stop+1}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+        edges(node_height-i,2)=node_mid+right_stop+1;
     end
 %     imshow(cell2mat(nodes));
 end
@@ -187,10 +183,11 @@ xr=edges(:,2);
 
 % 避障算法
 barrier=img_depth;
-barrier(barrier(:)>10000)=0;
+barrier(floor(nodesize*node_height/3):end,:)=0;
+barrier(barrier(:)>800)=0;
 barrier=imbinarize(barrier);
-barrier(floor(height/3):end,:)=0;
-% barrier=imerode(barrier,strel('disk',5));
+
+barrier=imerode(barrier,core);
 % figure(3);imshow(barrier);
 [~, cols] = find(barrier);
 leftmost_point = min(cols);
