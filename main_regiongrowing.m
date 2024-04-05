@@ -5,11 +5,9 @@ clear
 close all
 
 % Create Kinect 2 object and initiqalize it
-% Available sources: 'color', 'depth', 'infrared', 'body_index', 'body',
-% 'face' and 'HDface'
 k2 = Kin2('color','depth');
-i=20;
-% images sizes
+% i=20;
+% 图像尺寸
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;
 
@@ -59,6 +57,16 @@ title('output');
 
 % 膨胀和腐蚀的卷积核
 core=strel('disk',7);
+
+% PID控制器
+dir_last_time=0;% 滤波后的，上一次循环的，机器人方向
+dir2_last_time=0;% 滤波前的，上一次循环的，预期的下一次，机器人方向
+weigh_last_time=0;
+kp=100;
+ki=0.1;
+kd=0.1;
+integrator=0;
+
 % 在没有运行指令时停止等待
 while(size(obj1.UserData,2)~=6) %没有收到指令
     pause(0.1);%等待
@@ -111,6 +119,7 @@ while(1)
             % 读取新的图像
             validData = k2.updateData;
             if validData
+                
                 % Copy data to Matlab matrices
                 depth = k2.getDepth;
                 color = k2.getColor;
@@ -125,16 +134,33 @@ while(1)
 %                 depthColor_d=depthColor_d.*16;
                 depthColor_d=u_basic_process(depthColor_d,9,core);
                 %imshowpair(depthColor_d,depthColor_c);
+                
 
                 % 查找道路标线
+                
                 edges=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
-                [out,dir]=u_APF(depthColor_c,edges);
-                set(h1,'CData',out);
+                
+                [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges);
+                
+                set(h1,'CData',out);drawnow;
 %                 figure(2);imshow(depthColor_d*16);
-                drawnow;
 
-                %输出命令
-                dv=fix(-dir*100);
+                %控制器
+                new_weigh=weigh/(weigh+weigh_last_time);
+                new_weigh_last_time=weigh_last_time/(weigh+weigh_last_time);
+                dir_this_time=dir1*new_weigh+dir2_last_time*new_weigh_last_time;
+                integrator=integrator+dir_this_time;
+                if integrator>v
+                    integrator=v;
+                elseif integrator<-v
+                    integrator=-v;
+                end
+                dv=fix(-(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time)));
+                dir_last_time=dir1;
+                dir2_last_time=dir2;
+                weigh_last_time=weigh;
+                
+%                 dv=fix(-dir*100);
                 % 增加限幅
                 if dv>v
                     dv=v;

@@ -830,8 +830,9 @@ u_plane_regiongrowing(img,img);
 
 %% 人工势场法
 img=imread("Resource\snapc30.png");
-edges=u_plane_regiongrowing(img,img);
-[out,dir]=u_APF(img,edges);
+core=strel('disk',7);
+edges=u_plane_regiongrowing(img,img,9,core);
+[out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges);
 imshow(out);
 disp(dir);
 

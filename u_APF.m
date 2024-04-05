@@ -1,6 +1,6 @@
-function [out,dir]=u_APF(img,edges)
+function [out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges)
 % edges: [y，xl，xr]
-[h,w,channel]=size(img);
+[h,w,~]=size(img);
 n=2*size(edges,1);%障碍个数
 %初始化车的参数
 Xo=[floor(w/2),h];%起点位置
@@ -10,13 +10,18 @@ Po=100;%障碍影响距离，当障碍和车的距离大于这个距离时，斥
 
 l=0.5;%步长
 J=1000;%循环迭代次数
-%如果不能实现预期目标，可能也与初始的增益系数，Po设置的不合适有关。
-%end 
 
 %给出障碍和目标信息，对于图像信息，先x再y
 Xsum=[(edges(5,2)+edges(5,3))/2,edges(5,1);edges(:,2), edges(:,1);edges(:,3), edges(:,1)];
 %这个向量是(n+1)*2维，其中第一个点是目标位置，剩下的都是障碍的位置。
-XXX=Xo;%j=1循环初始，将车的起始坐标赋给XXX
+XXX=Xo;%XXX表示车的当前位置
+
+goal=zeros(J,2);
+deltaX=zeros(n+1,1);
+deltaY=zeros(n+1,1);
+r=zeros(n+1,1);
+Frex=zeros(n+1,1);
+Frey=zeros(n+1,1);
 %***************初始化结束，开始主体循环******************
 for j=1:J %循环开始
     goal(j,1)=XXX(1); %Goal是保存车走过的每个点的坐标。刚开始先将起点放进该向量。
@@ -26,7 +31,7 @@ for j=1:J %循环开始
          deltaY(i)=Xsum(i,2)-XXX(2);
          r(i)=sqrt(deltaX(i)^2+deltaY(i)^2);
     end
-    Rgoal=sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2);   %路径点和目标的距离
+    %Rgoal=sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2);   %路径点和目标的距离
     %目标点对路径点的引力
     Fatx=k*deltaX(1);
     Faty=k*deltaY(1);
@@ -50,12 +55,14 @@ for j=1:J %循环开始
     XXX=Xnext;
     
     if (sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2)<0.1)   %当物体接近目标点时
-        k=j;   %迭代次数
+%         K=j;   %迭代次数
         break;
     end
 end
-
 K=j;
+
+weigh=2^(-sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2));
+
 goal(K,1)=Xsum(1,1);%把路径向量的最后一个点赋值为目标
 goal(K,2)=Xsum(1,2);
 
@@ -76,5 +83,7 @@ y=Xsum(2:n+1,2);
 out=insertMarker(img,[x,y],'o','Color','green');
 out=insertMarker(out,[X,Y],'x-mark','Color','red');
 % plot(x,y,'o',X,Y,'.r');
-dir=(X(5)-floor(w/2))/(Y(5)-h);
+dir_this_time=(X(3)-floor(w/2))/(Y(3)-h);
+dir_next_time=(X(6)-X(3))/(Y(6)-Y(3));
+
 end
