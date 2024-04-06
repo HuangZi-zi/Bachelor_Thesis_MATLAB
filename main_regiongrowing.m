@@ -67,13 +67,17 @@ ki=0.1;
 kd=0.1;
 integrator=0;
 
+% 语音提示
+[audio_stop,Fs]=audioread('Resource\blocked_by_barrier.mp3');
+
+
 % 在没有运行指令时停止等待
 while(size(obj1.UserData,2)~=6) %没有收到指令
     pause(0.1);%等待
 end
 
 while(1)
-    %tic
+    tic
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -119,7 +123,7 @@ while(1)
             % 读取新的图像
             validData = k2.updateData;
             if validData
-                
+
                 % Copy data to Matlab matrices
                 depth = k2.getDepth;
                 color = k2.getColor;
@@ -138,11 +142,18 @@ while(1)
 
                 % 查找道路标线
                 
-                edges=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
+                [edges,barrier]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
                 
-                [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges);
-                
-                set(h1,'CData',out);drawnow;
+                if barrier(1)<width_cd/2 && barrier(2)>width_cd/2 % 停车
+                    sendcomm_stop(obj2);
+                    sound(audio_stop,Fs);
+                    pause(1.5);
+                    continue;
+                else
+                    [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges);
+                    set(h1,'CData',out);drawnow;
+                end
+
 %                 figure(2);imshow(depthColor_d*16);
 
                 %控制器
@@ -161,49 +172,7 @@ while(1)
                 weigh_last_time=weigh;
                 
 %                 dv=fix(-dir*100);
-                % 增加限幅
-                if dv>v
-                    dv=v;
-                elseif dv<-v
-                    dv=-v;
-                end
-                vl=v+dv+32768;
-                vr=v-dv;
-                % 前进为左边反转，右边正转
-                % fprintf("left:%d; right:%d\n",vl,vr)
-                % fprintf("dv:%d\n",dv)
-                %     fprintf("v:%d \n",v)
-                vlhex=dec2hex(vl,4);
-                vrhex=dec2hex(vr,4);
-                vlh= vlhex(1:2) ;%高位
-                vll=vlhex(3:4);%低位
-                vrh= vrhex(1:2) ;%高位
-                vrl=vrhex(3:4) ;%低位
-
-                sendbuff=zeros(1,9);
-                % 16进制 55 aa 71 04 10 vlh vll vrh vrl sum
-                sendbuff(1)= 85;
-                sendbuff(2)= 170;
-                sendbuff(3)= 113;
-                sendbuff(4)= 4;
-                sendbuff(5)= 16;
-
-                %             sendbuff(1)= hex2dec('55');
-                %             sendbuff(2)= hex2dec('aa');
-                %             sendbuff(3)= hex2dec('71');
-                %             sendbuff(4)= hex2dec('04');
-                %             sendbuff(5)= hex2dec('10');
-                sendbuff(6)= hex2dec(vlh);
-                sendbuff(7)= hex2dec(vll);
-                sendbuff(8)= hex2dec(vrh);
-                sendbuff(9)= hex2dec(vrl);
-                %校验和
-                %校验位=前面所有数据之和，取最后两位
-                add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
-                two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
-                % two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
-                sendbuff(10)= two_bits_d;
-                write(obj2,sendbuff,"uint8");
+               sendcomm_run(obj2,v,dv)
 
             end
         end
@@ -211,7 +180,7 @@ while(1)
         pause(0.1);
     end
 
-%toc
+toc
 end
 
 
@@ -219,7 +188,52 @@ end
 k2.delete;
 
 close all;
+%% 运行函数
+function sendcomm_run(port,v,dv)
+% 增加限幅
+if dv>v
+    dv=v;
+elseif dv<-v
+    dv=-v;
+end
+vl=v+dv+32768;
+vr=v-dv;
+% 前进为左边反转，右边正转
+% fprintf("left:%d; right:%d\n",vl,vr)
+% fprintf("dv:%d\n",dv)
+%     fprintf("v:%d \n",v)
+vlhex=dec2hex(vl,4);
+vrhex=dec2hex(vr,4);
+vlh= vlhex(1:2) ;%高位
+vll=vlhex(3:4);%低位
+vrh= vrhex(1:2) ;%高位
+vrl=vrhex(3:4) ;%低位
 
+sendbuff=zeros(1,9);
+% 16进制 55 aa 71 04 10 vlh vll vrh vrl sum
+sendbuff(1)= 85;
+sendbuff(2)= 170;
+sendbuff(3)= 113;
+sendbuff(4)= 4;
+sendbuff(5)= 16;
+
+%             sendbuff(1)= hex2dec('55');
+%             sendbuff(2)= hex2dec('aa');
+%             sendbuff(3)= hex2dec('71');
+%             sendbuff(4)= hex2dec('04');
+%             sendbuff(5)= hex2dec('10');
+sendbuff(6)= hex2dec(vlh);
+sendbuff(7)= hex2dec(vll);
+sendbuff(8)= hex2dec(vrh);
+sendbuff(9)= hex2dec(vrl);
+%校验和
+%校验位=前面所有数据之和，取最后两位
+add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
+two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
+% two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
+sendbuff(10)= two_bits_d;
+write(port,sendbuff,"uint8");
+end
 
 %% 停止函数
 function sendcomm_stop(port)
