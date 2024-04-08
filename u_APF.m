@@ -1,6 +1,7 @@
-function [out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges)
+function [out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges,v)
 % edges: [y，xl，xr]
 [h,w,~]=size(img);
+nodesize=edges(2,1)-edges(1,1);
 n=2*size(edges,1);%障碍个数
 %初始化车的参数
 Xo=[floor(w/2),h];%起点位置
@@ -83,7 +84,14 @@ y=Xsum(2:n+1,2);
 out=insertMarker(img,[x,y],'o','Color','green');
 out=insertMarker(out,[X,Y],'x-mark','Color','red');
 % plot(x,y,'o',X,Y,'.r');
-dir_this_time=(X(3)-floor(w/2))/(Y(3)-h);
-dir_next_time=(X(6)-X(3))/(Y(6)-Y(3));
+
+line1=abs(Y-(h-nodesize));
+[~, index1] = min(line1(:));
+dir_this_time=2*v./(1+exp(-(1/v*10)*(X(index1)-w/2)))-v;
+% disp(X(index1));
+line2=abs(Y-(h-2*nodesize));
+[~, index2] = min(line2(:));
+
+dir_next_time=2*v./(1+exp(-(1/v*10)*(X(index2)-X(index1))))-v;
 
 end

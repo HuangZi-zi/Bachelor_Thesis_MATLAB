@@ -1,4 +1,4 @@
-function [out,barrier_out]=u_plane_regiongrowing(img_color, img_depth,nodesize,core)
+function [out,barrier_point,barrier_pos]=u_plane_regiongrowing(img_color, img_depth,nodesize,core)
 
 [height,width,~]=size(img_color);
 
@@ -204,19 +204,20 @@ barrier=imerode(barrier,core);
 [~, cols] = find(barrier);
 
 if isempty(cols) % 没有障碍物
-    barrier_out=[width,1];
+    barrier_pos=[width,1];
     out=[(y-1).*nodesize+1+floor(nodesize/2),(xl-1).*nodesize+1+floor(nodesize/2),(xr-1).*nodesize+1+floor(nodesize/2)];
     out=out(((end-10):end),:);
+    barrier_point=[];
 else % 有障碍物
     leftmost_point = min(cols);
     rightmost_point = max(cols);
     barrier_point_x=leftmost_point:nodesize:rightmost_point;
     barrier_point_y=repmat((node_height-3).*nodesize+6,1,size(barrier_point_x,2));
 
-    barrier_out=[leftmost_point,rightmost_point];
+    barrier_pos=[leftmost_point,rightmost_point];
     out=[(y-1).*nodesize+1+floor(nodesize/2),(xl-1).*nodesize+1+floor(nodesize/2),(xr-1).*nodesize+1+floor(nodesize/2)];
     out=out(((end-10):end),:);
-    out=union(out,[barrier_point_y',barrier_point_x',barrier_point_x'],"rows");
+    barrier_point=[barrier_point_y',barrier_point_x',barrier_point_x'];
 end
 
 

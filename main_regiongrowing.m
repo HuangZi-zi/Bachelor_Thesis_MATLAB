@@ -15,6 +15,7 @@ color_width = 1920; color_height = 1080;
 depth = zeros(depth_height,depth_width,'uint16');
 color = zeros(color_height,color_width,3,'uint8');
 
+edges_last_time=zeros(11,3);
 % calib = k2.getDepthIntrinsics;
 % d_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
 %                          [calib.PrincipalPointX,calib.PrincipalPointY], ...
@@ -62,8 +63,8 @@ core=strel('disk',7);
 dir_last_time=0;% 滤波后的，上一次循环的，机器人方向
 dir2_last_time=0;% 滤波前的，上一次循环的，预期的下一次，机器人方向
 weigh_last_time=0;
-kp=100;
-ki=0.1;
+kp=1.1;
+ki=0.2;
 kd=0.1;
 integrator=0;
 
@@ -77,7 +78,7 @@ while(size(obj1.UserData,2)~=6) %没有收到指令
 end
 
 while(1)
-    tic
+    %tic
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -142,18 +143,22 @@ while(1)
 
                 % 查找道路标线
                 
-                [edges,barrier]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
-                
-                if barrier(1)<width_cd/2 && barrier(2)>width_cd/2 % 停车
+                [edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
+                edges=(edges+edges_last_time)/2;% FIR滤波器平滑edges
+                if isempty(barrier)% 没有障碍物
+                    [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges,v);
+                    set(h1,'CData',out);drawnow;
+                elseif barrier_pos(1)<width_cd/2 && barrier_pos(2)>width_cd/2 % 停车
                     sendcomm_stop(obj2);
                     sound(audio_stop,Fs);
                     pause(1.5);
                     continue;
-                else
-                    [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges);
+                else %避障
+                    edges_and_barrier=union(edges,barrier,"rows");
+                    [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges_and_barrier,v);
                     set(h1,'CData',out);drawnow;
                 end
-
+                edges_last_time=edges;% 更新上一次的边界值
 %                 figure(2);imshow(depthColor_d*16);
 
                 %控制器
@@ -166,7 +171,7 @@ while(1)
                 elseif integrator<-v
                     integrator=-v;
                 end
-                dv=fix(-(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time)));
+                dv=fix(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time));
                 dir_last_time=dir1;
                 dir2_last_time=dir2;
                 weigh_last_time=weigh;
@@ -180,7 +185,7 @@ while(1)
         pause(0.1);
     end
 
-toc
+%toc
 end
 
 
