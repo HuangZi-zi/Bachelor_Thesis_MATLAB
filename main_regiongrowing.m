@@ -15,7 +15,7 @@ color_width = 1920; color_height = 1080;
 depth = zeros(depth_height,depth_width,'uint16');
 color = zeros(color_height,color_width,3,'uint8');
 
-edges_last_time=zeros(11,3);
+
 % calib = k2.getDepthIntrinsics;
 % d_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
 %                          [calib.PrincipalPointX,calib.PrincipalPointY], ...
@@ -55,6 +55,9 @@ end
 out = zeros(height_cd,width_cd,3,'uint8');
 figure, h1 = imshow(out,[]);
 title('output');
+
+% 存贮边缘
+edges_last_time=[(height_cd:-nodesize:height_cd-10*nodesize)',ones(11,1),width_cd*ones(11,1)];
 
 % 膨胀和腐蚀的卷积核
 core=strel('disk',7);

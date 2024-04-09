@@ -37,6 +37,7 @@ if rem(nodesize,2) % nodesize为奇数，取中间1行
             c(i,j)=scan_lines{i,j}(3,2)-a(i,j)*scan_lines{i,j}(1,2);
         end
     end
+    
 else % nodesize为偶数，取中间2行
     for i=1:node_height
         for j=1:node_width
@@ -77,17 +78,20 @@ end
 % 历史版本：从最下面中间开始遍历，再逐行向上
 node=nodes{node_height,node_mid};
 color_mid=reshape(mean(node,[1,2]),1,3);
-for j=1:floor(node_width/2-1)
-    node_left=nodes{node_height,node_mid-j};
-    node_right=nodes{node_height,node_mid+j};
-    color_left=reshape(mean(node_left,[1,2]),1,3);
-    color_right=reshape(mean(node_right,[1,2]),1,3);
-    left=colorvalue(color_left,color_mid);
-    right=colorvalue(color_right,color_mid);
-    nodes{node_height,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
-    if left>t_color&&~left_stop %色彩相似且没有停止，向左生长
-        nodes{node_height,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给左边生长出的节点上色
-        if j==floor(node_width/2-1)% 到达边界，停止
+node_left=nodes{node_height,node_mid-1};
+node_right=nodes{node_height,node_mid+1};
+color_left=reshape(mean(node_left,[1,2]),1,3);
+color_right=reshape(mean(node_right,[1,2]),1,3);
+left=colorvalue(color_left,color_mid);
+right=colorvalue(color_right,color_mid);
+%     nodes{node_height,node_mid}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给中间node上色
+for j=2:floor(node_width/2)+1
+    if left>t_color&&~left_stop %左侧色彩相似且没有停止，向左生长
+%         nodes{node_height,node_mid-j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));% 给左边生长出的节点上色
+        node_left=nodes{node_height,node_mid-j};
+        color_left=reshape(mean(node_left,[1,2]),1,3);
+        left=colorvalue(color_left,color_mid);
+        if node_mid-j==1% 到达边界，停止
             left_stop=j;
             edges(node_height,1)=node_mid-left_stop;
         end
@@ -95,9 +99,12 @@ for j=1:floor(node_width/2-1)
         left_stop=j;
         edges(node_height,1)=node_mid-left_stop;
     end
-    if right>t_color&&~right_stop
-        nodes{node_height,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
-        if j==floor(node_width/2-1)
+    if right>t_color&&~right_stop %右侧色彩相似且没有停止，向右生长
+%         nodes{node_height,node_mid+j}=uint8(repmat(reshape([255,0,0],1,1,3),nodesize,nodesize));
+        node_right=nodes{node_height,node_mid+j};
+        color_right=reshape(mean(node_right,[1,2]),1,3); 
+        right=colorvalue(color_right,color_mid);
+        if node_mid+j==node_width
             right_stop=j;
             edges(node_height,2)=node_mid+right_stop;
         end
