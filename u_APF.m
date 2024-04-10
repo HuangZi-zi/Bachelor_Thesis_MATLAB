@@ -6,7 +6,7 @@ n=2*size(edges,1);%障碍个数
 %初始化车的参数
 Xo=[floor(w/2),h];%起点位置
 k=2;%计算引力需要的增益系数
-m=800;%计算斥力的增益系数
+m=400;%计算斥力的增益系数
 Po=100;%障碍影响距离，当障碍和车的距离大于这个距离时，斥力为0，即不受该障碍的影响
 
 l=0.5;%步长
@@ -88,11 +88,12 @@ out=insertMarker(out,[X,Y],'x-mark','Color','red');
 
 line1=abs(Y-(h-nodesize));
 [~, index1] = min(line1(:));
-dir_this_time=2*v./(1+exp(-(1/v*10)*(X(index1)-w/2)))-v;
+% dir_this_time=2*v./(1+exp(-(1/v*10)*(X(index1)-w/2)))-v;
+dir_this_time=200./(1+exp(-(1/50)*(X(index1)-w/2)))-100;
 % disp(X(index1));
 line2=abs(Y-(h-2*nodesize));
 [~, index2] = min(line2(:));
 
-dir_next_time=2*v./(1+exp(-(1/v*10)*(X(index2)-X(index1))))-v;
+dir_next_time=200./(1+exp(-(1/50)*(X(index2)-X(index1))))-100;
 
 end

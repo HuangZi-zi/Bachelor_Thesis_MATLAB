@@ -57,7 +57,7 @@ figure, h1 = imshow(out,[]);
 title('output');
 
 % 存贮边缘
-edges_last_time=[(height_cd:-nodesize:height_cd-10*nodesize)',ones(11,1),width_cd*ones(11,1)];
+edges_last_time=[(height_cd-10*nodesize:nodesize:height_cd)',ones(11,1),width_cd*ones(11,1)];
 
 % 膨胀和腐蚀的卷积核
 core=strel('disk',7);
@@ -66,9 +66,9 @@ core=strel('disk',7);
 dir_last_time=0;% 滤波后的，上一次循环的，机器人方向
 dir2_last_time=0;% 滤波前的，上一次循环的，预期的下一次，机器人方向
 weigh_last_time=0;
-kp=1.1;
-ki=0.2;
-kd=0.1;
+kp=2.04;
+ki=0;
+kd=1.92;
 integrator=0;
 
 % 语音提示
@@ -80,8 +80,18 @@ while(size(obj1.UserData,2)~=6) %没有收到指令
     pause(0.1);%等待
 end
 
+% 绘制阶跃响应曲线
+% figure(2);
+% plot(0, 0, '-o');  % Plot the initial state
+% xlabel('Time');
+% ylabel('Variable');
+% title('Variable vs Time');
+% grid on;
+% hold on;
+% t=0;
+
 while(1)
-    %tic
+%     time=tic;
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -168,6 +178,10 @@ while(1)
                 new_weigh=weigh/(weigh+weigh_last_time);
                 new_weigh_last_time=weigh_last_time/(weigh+weigh_last_time);
                 dir_this_time=dir1*new_weigh+dir2_last_time*new_weigh_last_time;
+%                 t=t+toc(time);
+%                 plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
+%                 drawnow;  % Force the plot to update
+
                 integrator=integrator+dir_this_time;
                 if integrator>v
                     integrator=v;
@@ -175,13 +189,14 @@ while(1)
                     integrator=-v;
                 end
                 dv=fix(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time));
+%                 dv=fix(dir_this_time);
                 dir_last_time=dir1;
                 dir2_last_time=dir2;
                 weigh_last_time=weigh;
                 
 %                 dv=fix(-dir*100);
                sendcomm_run(obj2,v,dv)
-
+%                 disp(dir_this_time);
             end
         end
     else % 停止运行
@@ -199,10 +214,10 @@ close all;
 %% 运行函数
 function sendcomm_run(port,v,dv)
 % 增加限幅
-if dv>v
-    dv=v;
-elseif dv<-v
-    dv=-v;
+if dv>1000
+    dv=1000;
+elseif dv<-1000
+    dv=-1000;
 end
 vl=v+dv+32768;
 vr=v-dv;
