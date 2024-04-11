@@ -66,9 +66,9 @@ core=strel('disk',7);
 dir_last_time=0;% 滤波后的，上一次循环的，机器人方向
 dir2_last_time=0;% 滤波前的，上一次循环的，预期的下一次，机器人方向
 weigh_last_time=0;
-kp=2.04;
+kp=6.04;
 ki=0;
-kd=1.92;
+kd=4.92;
 integrator=0;
 
 % 语音提示
@@ -91,7 +91,7 @@ end
 % t=0;
 
 while(1)
-%     time=tic;
+    tic;
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -146,11 +146,11 @@ while(1)
                 color=imresize(color,[375,667]);
 
                 depthColor_c=fliplr(imcrop(color,[89 1 width_cd-1 height_cd-1]));
-                depthColor_c=u_basic_process(depthColor_c,9,core);
+                depthColor_c=u_basic_process(depthColor_c,3,core);
                 depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
                 depthColor_d(depthColor_d>4096) = 4096;
 %                 depthColor_d=depthColor_d.*16;
-                depthColor_d=u_basic_process(depthColor_d,9,core);
+                depthColor_d=u_basic_process(depthColor_d,3,core);
                 %imshowpair(depthColor_d,depthColor_c);
                 
 
@@ -203,7 +203,7 @@ while(1)
         pause(0.1);
     end
 
-%toc
+toc
 end
 
 

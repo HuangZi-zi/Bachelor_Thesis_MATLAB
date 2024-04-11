@@ -15,7 +15,7 @@ scan_lines=cell(node_height, node_width);
 a=zeros(node_height, node_width);
 c=zeros(node_height, node_width);
 
-t_color=0.90;% 像素相似度的阈值
+t_color=0.93;% 像素相似度的阈值
 % t_merge=0.8;% 直线相似度的阈值
 % left_stop=0;
 % right_stop=0;
@@ -77,7 +77,7 @@ end
 
 % 从最下面一行开始扫描
 left_stop=half_line_left(nodes(node_height,1:node_mid_index),node_mid_index,t_color);
-right_stop=half_line_right(nodes(node_height,node_mid_index:end),node_mid_index,t_color);
+right_stop=half_line_right(nodes(node_height,node_mid_index:end),t_color);
 edges(node_height,1)=node_mid_index-left_stop;
 edges(node_height,2)=node_mid_index+right_stop;
 
@@ -125,8 +125,8 @@ edges(node_height,2)=node_mid_index+right_stop;
 % 然后从下往上进行遍历
 % 取两个node为一个判别指标。例如左边，要求左边node不相似，右边node相似，才判断出边界。
 for i=node_height-1:-1:node_height-11
-    new_mid=floor((edges(i+1,1)+edges(i+1,2))/2);% 以下方一行的中间作为中间
-    node=nodes{i,new_mid};
+    new_mid_index=floor((edges(i+1,1)+edges(i+1,2))/2);% 以下方一行的中间作为中间
+    node=nodes{i,new_mid_index};
 
     node_left=nodes(i,node_mid_index-left_stop:node_mid_index-left_stop+1);%分配邻域
     %     imshow(cell2mat(node_left));
@@ -141,12 +141,13 @@ for i=node_height-1:-1:node_height-11
 
     % 判断左侧
     if isequal(left,[1,1])%两个节点都在道路上，重新按行扫描
-        node_left=nodes(i,1:new_mid);
-        left_stop=half_line_left(node_left,new_mid,t_color);
-        edges(i,1)=new_mid-left_stop;
+        node_left=nodes(i,1:new_mid_index);
+        left_stop=half_line_left(node_left,new_mid_index,t_color);
+        edges(i,1)=new_mid_index-left_stop;
+        left_stop=node_mid_index-edges(i,1);
     elseif isequal(left,[1,0])||isequal(left,[0,0])
         % 两个都在标线上，或者右侧在标线上，向右生长
-        while ~isequal(left,[0,1]) && left_stop>=1
+        while ~isequal(left,[0,1]) && left_stop>=-node_mid_index
             left_stop=left_stop-1;
             node_left=nodes(i,node_mid_index-left_stop:node_mid_index-left_stop+1);
             left=neighbor(node_left,node,t_color);
@@ -159,12 +160,13 @@ for i=node_height-1:-1:node_height-11
 
     % 判断右侧
     if isequal(right,[1,1])%两个节点都在道路上，重新按行扫描
-        node_right=nodes(i,new_mid:end);
-        right_stop=half_line_right(node_right,new_mid,t_color);
-        edges(i,2)=new_mid+right_stop;
+        node_right=nodes(i,new_mid_index:end);
+        right_stop=half_line_right(node_right,t_color);
+        edges(i,2)=new_mid_index+right_stop;
+        right_stop=edges(i,2)-node_mid_index;
     elseif isequal(right,[0,1])||isequal(right,[0,0])
         % 两个都在标线上，或者左边在右边不在，向左生长
-        while ~isequal(right,[1,0]) && right_stop>=1
+        while ~isequal(right,[1,0]) && right_stop>=-node_mid_index
             right_stop=right_stop-1;
             node_right=nodes(i,node_mid_index+right_stop-1:node_mid_index+right_stop);
             right=neighbor(node_right,node,t_color);
@@ -173,10 +175,10 @@ for i=node_height-1:-1:node_height-11
     else%[1,0]的情况,左边不在标线上，右边在
         edges(i,2)=node_mid_index+right_stop;
     end
-    %     一行的扫描结果可视化
-    %     nodes{i,edges(i,1)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
-    %     nodes{i,edges(i,2)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
-    %     imshow(cell2mat(nodes));
+    % 一行的扫描结果可视化
+%     nodes{i,edges(i,1)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
+%     nodes{i,edges(i,2)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
+%     imshow(cell2mat(nodes));
 
 end
 % figure(2);imshow(cell2mat(nodes));title("邻域生长法线特征检测结果");
@@ -351,17 +353,18 @@ out=left_stop;
 end
 
 %% 在右边一半生长
-function out=half_line_right(nodes,node_mid_index,t_color)
+function out=half_line_right(nodes,t_color)
 node=nodes{1,1};
+[~,w]=size(nodes);
 color_mid=reshape(mean(node,[1,2]),1,3);
 right_stop=0;
-for j=2:node_mid_index-1
+for j=2:w
     node_right=nodes{1,j};
     color_right=reshape(mean(node_right,[1,2]),1,3);
     right=colorvalue(color_right,color_mid,t_color);
     if right %右侧色彩相似且没有停止，向右生长
-        if node_mid_index-j==1% 到达边界，停止
-            right_stop=j;
+        if j==w% 到达边界，停止
+            right_stop=j-1;
             break;
         end
     elseif ~right %色彩不相似，停止生长

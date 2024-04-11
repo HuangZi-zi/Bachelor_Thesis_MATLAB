@@ -82,8 +82,8 @@ Y=goal(:,2);
 x=Xsum(2:n+1,1);
 y=Xsum(2:n+1,2);
 
-% out=insertMarker(img,[x,y],'o','Color','green');
-out=insertMarker(img,[X,Y],'x-mark','Color','red');
+out=insertMarker(img,[x,y],'o','Color','green');
+out=insertMarker(out,[X,Y],'x-mark','Color','red');
 % plot(x,y,'o',X,Y,'.r');
 
 line1=abs(Y-(h-nodesize));
