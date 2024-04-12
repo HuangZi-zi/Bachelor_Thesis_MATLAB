@@ -91,7 +91,7 @@ end
 % t=0;
 
 while(1)
-    tic;
+    %tic;
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -203,7 +203,7 @@ while(1)
         pause(0.1);
     end
 
-toc
+%toc
 end
 
 
