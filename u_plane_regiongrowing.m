@@ -15,7 +15,7 @@ scan_lines=cell(node_height, node_width);
 a=zeros(node_height, node_width);
 c=zeros(node_height, node_width);
 
-t_color=0.93;% 像素相似度的阈值
+t_color=0.95;% 像素相似度的阈值
 % t_merge=0.8;% 直线相似度的阈值
 % left_stop=0;
 % right_stop=0;
