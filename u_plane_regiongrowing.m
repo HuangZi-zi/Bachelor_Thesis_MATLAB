@@ -1,4 +1,4 @@
-function [out,barrier_point,barrier_pos]=u_plane_regiongrowing(img_color, img_depth,nodesize,core)
+function [out,barrier_point,barrier_pos]=u_plane_regiongrowing(img_color, img_depth,nodesize,core,t_color)
 
 [height,width,~]=size(img_color);
 
@@ -15,7 +15,7 @@ scan_lines=cell(node_height, node_width);
 a=zeros(node_height, node_width);
 c=zeros(node_height, node_width);
 
-t_color=0.95;% 像素相似度的阈值
+% t_color=0.90;% 像素相似度的阈值
 % t_merge=0.8;% 直线相似度的阈值
 % left_stop=0;
 % right_stop=0;
@@ -80,7 +80,8 @@ left_stop=half_line_left(nodes(node_height,1:node_mid_index),node_mid_index,t_co
 right_stop=half_line_right(nodes(node_height,node_mid_index:end),t_color);
 edges(node_height,1)=node_mid_index-left_stop;
 edges(node_height,2)=node_mid_index+right_stop;
-
+% nodes{node_height,edges(node_height,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+% nodes{node_height,edges(node_height,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
 %历史版本，未调用函数
 % node=nodes{node_height,node_mid_index};
 % color_mid=reshape(mean(node,[1,2]),1,3);
@@ -124,7 +125,7 @@ edges(node_height,2)=node_mid_index+right_stop;
 
 % 然后从下往上进行遍历
 % 取两个node为一个判别指标。例如左边，要求左边node不相似，右边node相似，才判断出边界。
-for i=node_height-1:-1:node_height-11
+for i=node_height-1:-1:1 % node_height-11
     new_mid_index=floor((edges(i+1,1)+edges(i+1,2))/2);% 以下方一行的中间作为中间
     node=nodes{i,new_mid_index};
 
@@ -134,10 +135,6 @@ for i=node_height-1:-1:node_height-11
     %     imshow(cell2mat(node_right));
     left=neighbor(node_left,node,t_color);
     right=neighbor(node_right,node,t_color);
-
-    %     nodes{node_m-i,node_mid_index+right_stop-1}=uint8(repmat(reshape([0,255,0],1,1,3),10,10));
-    %     nodes{node_m-i,node_mid_index-left_stop+1}=uint8(repmat(reshape([0,0,255],1,1,3),10,10));
-    %     imshow(cell2mat(nodes));
 
     % 判断左侧
     if isequal(left,[1,1])%两个节点都在道路上，重新按行扫描
@@ -176,8 +173,8 @@ for i=node_height-1:-1:node_height-11
         edges(i,2)=node_mid_index+right_stop;
     end
     % 一行的扫描结果可视化
-%     nodes{i,edges(i,1)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
-%     nodes{i,edges(i,2)}=uint8(repmat(reshape([125,0,125],1,1,3),nodesize,nodesize));
+%     nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+%     nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
 %     imshow(cell2mat(nodes));
 
 end

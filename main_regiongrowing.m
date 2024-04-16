@@ -156,7 +156,7 @@ while(1)
 
                 % 查找道路标线
                 
-                [edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core);
+                [edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core,0.9);
                 edges=(edges+edges_last_time)/2;% FIR滤波器平滑edges
                 if isempty(barrier)% 没有障碍物
                     [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges,v);
