@@ -56,7 +56,7 @@ for j=1:J %循环开始
     Xnext(2)=(XXX(2)+l*Fsumy/F);
     XXX=Xnext;
     
-    if (sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2)<0.1)   %当物体接近目标点时
+    if (sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2)<l)   %当物体接近目标点时
 %         K=j;   %迭代次数
         break;
     end
@@ -71,20 +71,18 @@ goal(K,2)=Xsum(1,2);
 %***********************************画出障碍，起点，目标，路径点*************************
 % figure(3);imshow(img);
 % hold on;
-%画出路径
+% 路径
 X=goal(:,1);
 Y=goal(:,2);
-%路径向量Goal是二维数组,X,Y分别是数组的x,y元素的集合，是两个一维数组。
-%x=[1 3 4 3 6 5.5 8];%障碍的x坐标
-%y=[1.2 2.5 4.5 6 2 5.5 8.5];
 
-% 画出障碍物
+% 障碍物
 x=Xsum(2:n+1,1);
 y=Xsum(2:n+1,2);
 
-out=insertMarker(img,[x,y],'o','Color','green');
-out=insertMarker(out,[X,Y],'x-mark','Color','red');
-% plot(x,y,'o',X,Y,'.r');
+out=insertMarker(img,[x,y],'s','Color','red');% 障碍点
+out=insertMarker(out,[X,Y],'x-mark','Color','green'); % 路径点
+out=insertShape(out,"filled-circle",[Xsum(1,1),Xsum(1,2),5],"Color",[255,165,0],Opacity=1);% 目标点
+out=insertShape(out,"filled-circle",[Xo,8],"Color","blue");% 起点
 
 line1=abs(Y-(h-nodesize));
 [~, index1] = min(line1(:));

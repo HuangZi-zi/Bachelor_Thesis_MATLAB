@@ -81,17 +81,18 @@ while(size(obj1.UserData,2)~=6) %没有收到指令
 end
 
 % 绘制阶跃响应曲线
-% figure(2);
-% plot(0, 0, '-o');  % Plot the initial state
-% xlabel('Time');
-% ylabel('Variable');
-% title('Variable vs Time');
-% grid on;
-% hold on;
-% t=0;
+v=0;
+figure(3);
+plot(0, 0, '-o');  % Plot the initial state
+xlabel('Time');
+ylabel('Variable');
+title('Variable vs Time');
+grid on;
+hold on;
+t=0;
 
 while(1)
-    %tic;
+    time=tic;
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -178,18 +179,20 @@ while(1)
                 new_weigh=weigh/(weigh+weigh_last_time);
                 new_weigh_last_time=weigh_last_time/(weigh+weigh_last_time);
                 dir_this_time=dir1*new_weigh+dir2_last_time*new_weigh_last_time;
-%                 t=t+toc(time);
-%                 plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
-%                 drawnow;  % Force the plot to update
+                t=t+toc(time);
+                plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
+                drawnow;  % Force the plot to update
 
-                integrator=integrator+dir_this_time;
+                integrator=integrator+dir_this_time*0.1;
                 if integrator>v
                     integrator=v;
                 elseif integrator<-v
                     integrator=-v;
                 end
                 dv=fix(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time));
-%                 dv=fix(dir_this_time);
+%                  dv=fix(dir1);
+%                 dv=fix(kp*dir1+ki*integrator+kd*(dir1-dir_last_time)/time);
+%                 disp(dv);
                 dir_last_time=dir1;
                 dir2_last_time=dir2;
                 weigh_last_time=weigh;
@@ -221,12 +224,22 @@ elseif dv<-1000
 end
 vl=v+dv+32768;
 vr=v-dv;
+
+% if dv>0
+%     vl=dv+32768;
+%     vr=dv+32768;
+% else
+%     vl=-dv;
+%     vr=-dv;
+% end
 % 前进为左边反转，右边正转
 % fprintf("left:%d; right:%d\n",vl,vr)
 % fprintf("dv:%d\n",dv)
 %     fprintf("v:%d \n",v)
 vlhex=dec2hex(vl,4);
 vrhex=dec2hex(vr,4);
+% fprintf("left:%s; right:%s\n",vlhex,vrhex)
+
 vlh= vlhex(1:2) ;%高位
 vll=vlhex(3:4);%低位
 vrh= vrhex(1:2) ;%高位

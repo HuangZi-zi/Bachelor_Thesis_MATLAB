@@ -207,6 +207,8 @@ end
 barrier=img_depth;
 barrier(floor(nodesize*node_height/3):end,:)=0;
 barrier(barrier(:)>800)=0;
+% barrier(barrier(:)>0)=1;
+% out=cast(barrier,"logical");
 barrier=imbinarize(barrier);
 
 barrier=imerode(barrier,core);
@@ -222,7 +224,12 @@ else % 有障碍物
     leftmost_point = min(cols);
     rightmost_point = max(cols);
     barrier_point_x=leftmost_point:nodesize:rightmost_point;
-    barrier_point_y=repmat((node_height-3).*nodesize+6,1,size(barrier_point_x,2));
+    if rightmost_point<width/2 %在很近的距离上对齐失效，手动平移
+         barrier_point_x= barrier_point_x-3*nodesize;
+%     elseif leftmost_point>width/2
+%         barrier_point_x= barrier_point_x+3*nodesize;
+    end
+    barrier_point_y=repmat((node_height-1).*nodesize+floor(nodesize/2)+1,1,size(barrier_point_x,2));
 
     barrier_pos=[leftmost_point,rightmost_point];
     out=[(y-1).*nodesize+1+floor(nodesize/2),(xl-1).*nodesize+1+floor(nodesize/2),(xr-1).*nodesize+1+floor(nodesize/2)];

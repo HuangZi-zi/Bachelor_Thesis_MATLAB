@@ -16,3 +16,6 @@
 *.pdf
 
 *.asv
+
+# 
+/simulation/slprj/

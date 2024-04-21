@@ -814,7 +814,7 @@ u_plane_regiongrowing(img,imgd)
 % 
 
 %% 对比一次二维中值和两次一维中值
-img=imread("Resource\lena.png");
+img=imread("Resource\oldman1.jpg");
 img=im2gray(img);
 subplot 221;imshow(img);title("origin");
 img=imnoise(img,'gaussian',0.002);
@@ -845,7 +845,7 @@ subplot 223;imshow(fil_xy_re);title("xy one-dimension filter");
 subplot 224;imshow(filted);title("two-dimensions filter");
 
 %% 对比sobel和canny算子
-img=imread("Resource\lena.png");
+img=imread("Resource\oldman1.jpg");
 img=im2gray(img);
 % subplot 221;imshow(img);title("origin");
 img=imnoise(img,'gaussian',0.002);
@@ -1163,3 +1163,18 @@ imshow(g1);title("g1")
 subplot 224
 imshow(g2);title("g2")
 
+%% 最小二乘法系统辨识
+% syms s;
+% phi=exp(-0.1*s)/(tau*s^2+s+s*exp(-0.1*s));
+
+% uu=ones(size(yy')).*9.737;
+% uu(133:end)=0;
+% yy=flip(yy);
+% xx=flip(xx);
+% uu=flip(uu);
+plot(xx,yy);
+
+
+U=arx([yy',uu],[2,2,1]);%辨识离散系统模型
+G1=tf(U)%辨识离散系统传递函数
+copyobj(figure(1),figure(2));
