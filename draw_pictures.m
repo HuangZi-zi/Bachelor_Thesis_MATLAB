@@ -9,19 +9,19 @@ if rem(width_cd,nodesize)
     width_cd = nodesize*floor(width_cd/nodesize)-1;
 end
 % color=imread("Resource\snapc30.png");%  % %
-color=imread("Resource\curl.jpg");
-color=imread("Resource\snapc2.png");
+% color=imread("Resource\curl.jpg");
+% color=imread("Resource\snapc2.png");
 % color=imread("Resource\road.jpg");
-% color=imread("Resource\snapc25.png");
+color=imread("Resource\snapc25.png");
 color=imresize(color,[375,667]);
 %depthColor_c=fliplr(imcrop(color,[89 1 width_cd height_cd-1]));
-depthColor_c=imcrop(color,[89 1 width_cd-1 height_cd-1]);
+depthColor_c=imcrop(color,[89 1 width_cd height_cd-1]);
 
-% depth=imread("Resource\snapd25.png");
-depth=imread("Resource\snapd2.png");
+depth=imread("Resource\snapd25.png");
+% depth=imread("Resource\snapd2.png");
 figure(3);imshow(depth)
 % depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
-depthColor_d=imcrop(depth,[1 8 width_cd-1 height_cd-1]);
+depthColor_d=imcrop(depth,[1 8 width_cd height_cd-1]);
 figure(1);imshow(depthColor_c)
 figure(2);imshow(depthColor_d)
 figure(3);imshow(depth)
@@ -40,7 +40,7 @@ plot(x,y);xlabel("偏离中心的像素");ylabel("两轮差速");
 
 %% 输出APF轨迹规划
 
-edges_and_barrier=union(edges,barrier,"rows");
+% edges_and_barrier=union(edges,barrier,"rows");
 [out,dir1,dir2,weigh]=u_APF(depthColor_c,edges,100);
 imshow(out)
 % % 画箭头图

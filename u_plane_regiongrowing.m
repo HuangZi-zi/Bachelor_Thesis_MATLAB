@@ -82,6 +82,7 @@ edges(node_height,1)=node_mid_index-left_stop;
 edges(node_height,2)=node_mid_index+right_stop;
 % nodes{node_height,edges(node_height,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
 % nodes{node_height,edges(node_height,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+
 %历史版本，未调用函数
 % node=nodes{node_height,node_mid_index};
 % color_mid=reshape(mean(node,[1,2]),1,3);
@@ -172,7 +173,7 @@ for i=node_height-1:-1:1 % node_height-11
     else%[1,0]的情况,左边不在标线上，右边在
         edges(i,2)=node_mid_index+right_stop;
     end
-    % 一行的扫描结果可视化
+%     % 一行的扫描结果可视化
 %     nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
 %     nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
 %     imshow(cell2mat(nodes));
@@ -183,25 +184,37 @@ y=(1:node_height)';% y坐标以node最上边算
 xl=edges(:,1);% x坐标以node最左边算
 xr=edges(:,2);
 
+% for i=1:node_height
+%     nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+%     nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+% end
+% imshow(cell2mat(nodes));
+
 % 根据空间特征重新定义边界
-t_a=5;
-t_c=100;
-for i=node_height:-1:floor(node_height/2) % 根据空间特性重新定义边界
+t_line=0.0;
+for i=node_height:-1:1 % 根据空间特性重新定义边界
     mid_slope=a(i,floor((edges(i,1)+edges(i,2))/2));
     mid_intercept=c(i,floor((edges(i,1)+edges(i,2))/2));
     for j=floor((edges(i,1)+edges(i,2))/2):-1:edges(i,1)
-        if abs(a(i,j)-mid_slope)>t_a || abs(c(i,j)-mid_intercept)>t_c
+        if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
             edges(i,1)=j;
             break;
         end
     end
     for j=floor((edges(i,1)+edges(i,2))/2):1:edges(i,2)
-        if abs(a(i,j)-mid_slope)>t_a || abs(c(i,j)-mid_intercept)>t_c
+        if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
             edges(i,2)=j;
             break;
         end
     end
 end
+
+for i=1:node_height
+    nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+    nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+end
+imshow(cell2mat(nodes));
+
 
 % 避障算法
 barrier=img_depth;
@@ -236,7 +249,7 @@ else % 有障碍物
     out=out(((end-10):end),:);
     barrier_point=[barrier_point_y',barrier_point_x',barrier_point_x'];
 end
-% % 将边缘可视化
+% 将边缘可视化
 % img=insertMarker(img_color,[out(:,2),out(:,1)],'o','Color','green');
 % img=insertMarker(img,[out(:,3),out(:,1)],'o','Color','magenta');
 % imshow(img);
@@ -377,4 +390,14 @@ for j=2:w
     end
 end
 out=right_stop;
+end
+
+%% 按行进行扫描
+function out=m_line(a1,a2,b1,b2,t)
+    mLine=(a1*a2+b1*b2)/(sqrt(a1^2+b1^2)*sqrt(a2^2+b2^2))*0.5+0.5;
+    if mLine>=t
+        out=1;
+    else
+        out=0;
+    end
 end
