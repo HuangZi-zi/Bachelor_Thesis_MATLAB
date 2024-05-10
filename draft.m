@@ -816,14 +816,14 @@ u_plane_regiongrowing(img,imgd)
 %% 对比一次二维中值和两次一维中值
 img=imread("Resource\oldman1.jpg");
 img=im2gray(img);
-subplot 221;imshow(img);title("origin");
+subplot 221;imshow(img);title("origin",'FontName','Times New Roman');
 img=imnoise(img,'gaussian',0.002);
 img=imnoise(img,'salt & pepper',0.02);
 img=im2double(img);
 h=480;
 w=640;
 
-subplot 222;imshow(img);title("noise");
+subplot 222;imshow(img);title("added noise",'FontName','Times New Roman');
 % 中值滤波
 filter_size=5;
 % hist_eq_double = im2double(hist_eq);
@@ -841,8 +841,8 @@ tic
 filted=medfilt2(img,[filter_size,filter_size]);%1次2维中值0.18264729s
 toc
 disp(['运行时间: ',num2str(toc)]);
-subplot 223;imshow(fil_xy_re);title("xy one-dimension filter");
-subplot 224;imshow(filted);title("two-dimensions filter");
+subplot 223;imshow(fil_xy_re);title("one-dimension mid-fil twice",'FontName','Times New Roman');
+subplot 224;imshow(filted);title("two-dimensions mid-fil once",'FontName','Times New Roman');
 
 %% 对比sobel和canny算子
 img=imread("Resource\oldman1.jpg");
@@ -854,7 +854,7 @@ img=im2double(img);
 h=480;
 w=640;
 
-subplot 221;imshow(img);title("noise");
+subplot 221;imshow(img);title("added noise",'FontName','Times New Roman');
 % 中值滤波
 filter_size=5;
 % hist_eq_double = im2double(hist_eq);
@@ -866,12 +866,12 @@ fil_x_re=reshape(fil_x,h,w)';
 y_dir=fil_x_re(:)';
 fil_xy=medfilt1(y_dir,filter_size);%2次1维中值0.03024628s
 fil_xy_re=reshape(fil_xy,w,h)';
-subplot 222;imshow(fil_xy_re);title("filtered");
+subplot 222;imshow(fil_xy_re);title("filtered",'FontName','Times New Roman');
 
 edgesobel = edge(fil_xy_re, 'sobel');
 edgecanny = edge(fil_xy_re, "canny");
-subplot 223;imshow(edgesobel);title("edge-Sobel");
-subplot 224;imshow(edgecanny);title("edge-Canny");
+subplot 223;imshow(edgesobel);title("edge-Sobel",'FontName','Times New Roman');
+subplot 224;imshow(edgecanny);title("edge-Canny",'FontName','Times New Roman');
 
 %% 曲线测试情况
 img=imread("Resource\snapc25.png");

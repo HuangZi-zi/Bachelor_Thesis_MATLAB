@@ -11,12 +11,12 @@ nodes=cell(node_height, node_width);% nodes
 % depth=zeros(node_height, node_width);
 edges=ones(node_height,2).*node_mid_index;
 % node_last_row=cell(1, node_width);
-scan_lines=cell(node_height, node_width);
-a=zeros(node_height, node_width);
-c=zeros(node_height, node_width);
+% scan_lines=cell(node_height, node_width);
+% a=zeros(node_height, node_width);
+% c=zeros(node_height, node_width);
 
 % t_color=0.90;% 像素相似度的阈值
-% t_merge=0.8;% 直线相似度的阈值
+% t_merge=0.99;% 直线相似度的阈值
 % left_stop=0;
 % right_stop=0;
 
@@ -25,16 +25,18 @@ if rem(nodesize,2) % nodesize为奇数，取中间1行
     for i=1:node_height
         for j=1:node_width
             nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
-                (j-1)*nodesize+1:min(j*nodesize,width),:);
-            %             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
-            %                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
-            scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2;...
-                (i-1)*nodesize+1+floor(nodesize/2),(i-1)*nodesize+1+floor(nodesize/2);...
-                img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+3),...
-                img_depth((i-1)*nodesize+1+floor(nodesize/2),j*nodesize-2)];
-            %             fit_spatial_line = fit(scan_lines{i,j}(1:2,:)',scan_lines{i,j}(3,:)',spatial_line);
-            a(i,j)=(scan_lines{i,j}(3,2)-scan_lines{i,j}(3,1))/(scan_lines{i,j}(1,2)-scan_lines{i,j}(1,1));
-            c(i,j)=scan_lines{i,j}(3,2)-a(i,j)*scan_lines{i,j}(1,2);
+                (j-1)*nodesize+1:min(j*nodesize,width),:);% 划分彩色图
+%             %             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+%             %                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+%             % 以均值形式存储深度
+%             scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2;...
+%                 (i-1)*nodesize+1+floor(nodesize/2),(i-1)*nodesize+1+floor(nodesize/2);...
+%                 img_depth((i-1)*nodesize+1+floor(nodesize/2),(j-1)*nodesize+3),...
+%                 img_depth((i-1)*nodesize+1+floor(nodesize/2),j*nodesize-2)];
+%             % 拟合扫描线
+%             %             fit_spatial_line = fit(scan_lines{i,j}(1:2,:)',scan_lines{i,j}(3,:)',spatial_line);
+%             a(i,j)=(scan_lines{i,j}(3,2)-scan_lines{i,j}(3,1))/(scan_lines{i,j}(1,2)-scan_lines{i,j}(1,1));
+%             c(i,j)=scan_lines{i,j}(3,2)-a(i,j)*scan_lines{i,j}(1,2);
         end
     end
 
@@ -43,18 +45,18 @@ else % nodesize为偶数，取中间2行
         for j=1:node_width
             nodes{i,j}=img_color((i-1)*nodesize+1:min(i*nodesize,height), ...
                 (j-1)*nodesize+1:min(j*nodesize,width),:);
-            %             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
-            %                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
-            scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2,(j-1)*nodesize+3,j*nodesize-2;... %x
-                (i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2+1,(i-1)*nodesize+nodesize/2+1;... %y
-                img_depth((i-1)*nodesize+nodesize/2,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2,j*nodesize-2),...%z
-                img_depth((i-1)*nodesize+nodesize/2+1,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2+1,j*nodesize-2)];
-            a1=(scan_lines{i,j}(3,2)-scan_lines{i,j}(3,1))/(scan_lines{i,j}(1,2)-scan_lines{i,j}(1,1));
-            a2=(scan_lines{i,j}(3,4)-scan_lines{i,j}(3,3))/(scan_lines{i,j}(1,4)-scan_lines{i,j}(1,3));
-            c1=scan_lines{i,j}(3,2)-a1*scan_lines{i,j}(1,2);
-            c2=scan_lines{i,j}(3,4)-a2*scan_lines{i,j}(1,4);
-            a(i,j)=(a1+a2)/2;
-            c(i,j)=(c1+c2)/2;
+%             %             depth(i,j)=mean(img_depth((i-1)*nodesize+1:min(i*nodesize,height), ...
+%             %                                       (j-1)*nodesize+1:min(j*nodesize,width)),"all");
+%             scan_lines{i,j}=[(j-1)*nodesize+3,j*nodesize-2,(j-1)*nodesize+3,j*nodesize-2;... %x
+%                 (i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2,(i-1)*nodesize+nodesize/2+1,(i-1)*nodesize+nodesize/2+1;... %y
+%                 img_depth((i-1)*nodesize+nodesize/2,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2,j*nodesize-2),...%z
+%                 img_depth((i-1)*nodesize+nodesize/2+1,(j-1)*nodesize+3),img_depth((i-1)*nodesize+nodesize/2+1,j*nodesize-2)];
+%             a1=(scan_lines{i,j}(3,2)-scan_lines{i,j}(3,1))/(scan_lines{i,j}(1,2)-scan_lines{i,j}(1,1));
+%             a2=(scan_lines{i,j}(3,4)-scan_lines{i,j}(3,3))/(scan_lines{i,j}(1,4)-scan_lines{i,j}(1,3));
+%             c1=scan_lines{i,j}(3,2)-a1*scan_lines{i,j}(1,2);
+%             c2=scan_lines{i,j}(3,4)-a2*scan_lines{i,j}(1,4);
+%             a(i,j)=(a1+a2)/2;
+%             c(i,j)=(c1+c2)/2;
         end
     end
 end
@@ -191,29 +193,36 @@ xr=edges(:,2);
 % imshow(cell2mat(nodes));
 
 % 根据空间特征重新定义边界
-t_line=0.0;
-for i=node_height:-1:1 % 根据空间特性重新定义边界
-    mid_slope=a(i,floor((edges(i,1)+edges(i,2))/2));
-    mid_intercept=c(i,floor((edges(i,1)+edges(i,2))/2));
-    for j=floor((edges(i,1)+edges(i,2))/2):-1:edges(i,1)
-        if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
-            edges(i,1)=j;
-            break;
-        end
-    end
-    for j=floor((edges(i,1)+edges(i,2))/2):1:edges(i,2)
-        if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
-            edges(i,2)=j;
-            break;
-        end
-    end
-end
+% t_line=0.89;
+% for i=floor(node_height/2):-1:1 % 根据空间特性重新定义边界
+%     mid_slope=a(i,floor((edges(i,1)+edges(i,2))/2));
+%     mid_intercept=c(i,floor((edges(i,1)+edges(i,2))/2));
+%     for j=floor((edges(i,1)+edges(i,2))/2):-1:edges(i,1)
+%         if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
+%             edges(i,1)=j;
+%             break;
+%         end
+%     end
+%     for j=floor((edges(i,1)+edges(i,2))/2):1:edges(i,2)
+%         if ~m_line(a(i,j),mid_slope,c(i,j),mid_intercept,t_line)
+%             edges(i,2)=j;
+%             break;
+%         end
+%     end
+% end
 
-for i=1:node_height
-    nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-    nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
-end
-imshow(cell2mat(nodes));
+% edges(16,2)=45;
+% edges(17,2)=45;
+% edges(18,2)=43;
+% edges(19,2)=43;
+% edges(20,2)=43;
+% edges(21,2)=44;
+% edges(22,2)=45;
+% for i=1:node_height
+%     nodes{i,edges(i,1)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+%     nodes{i,edges(i,2)}=uint8(repmat(reshape([0,255,0],1,1,3),nodesize,nodesize));
+% end
+% imshow(cell2mat(nodes));
 
 
 % 避障算法
@@ -261,20 +270,23 @@ end
 % zr=depth(indexr);
 %
 %
-% % 在深度图上拟合，一行节点对应一条空间直线
-% a=(zl-zr)./(xl-xr);
-% b=zl-a.*xl;
-%
+
 % % 尝试合并节点，如果相邻的空间直线参数类似，则可以合并对应的节点
+% xl=edges(:,1);% x坐标以node最左边算
+% xr=edges(:,2);
+% for i=1:node_height
+%     aa(i)=mean(a(i,edges(i,1):edges(i,2)));
+%     bb(i)=mean(c(i,edges(i,1):edges(i,2)));
+% end
 % xy=[];
 % firstmerge=1;
-% for k=2:node_m-1
-%     m1=[a(k-1),-1];
-%     m2=[a(k),-1];
-%     m3=[a(k+1),-1];
-%     n1=[b(k+1)-b(k),-1];
-%     n2=[b(k)-b(k-1),-1];
-%     n3=[(b(k+1)-b(k-1))./2,-1];
+% for k=2:node_height-1
+%     m1=[aa(k-1),-1];
+%     m2=[aa(k),-1];
+%     m3=[aa(k+1),-1];
+%     n1=[bb(k+1)-bb(k),-1];
+%     n2=[bb(k)-bb(k-1),-1];
+%     n3=[(bb(k+1)-bb(k-1))./2,-1];
 %     sum_m=dot(m1,m2)/(norm(m1)*norm(m2))+dot(m1,m3)/(norm(m1)*norm(m3))+dot(m2,m3)/(norm(m2)*norm(m3));
 %     sum_n=dot(n1,n2)/(norm(n1)*norm(n2))+dot(n1,n3)/(norm(n1)*norm(n3))+dot(n2,n3)/(norm(n2)*norm(n3));
 %     measure(k)=(sum_m+sum_n)/6+0.5;
@@ -287,15 +299,15 @@ end
 %         xy=union(xy,[xl(k-1),y(k-1),xr(k-1),y(k-1);xl(k),y(k),xr(k),y(k);xl(k+1),y(k+1),xr(k+1),y(k+1)],"rows");
 %     end
 % end
-% xy=(xy-1).*nodesize+1;
+% xy=(xy-1).*nodesize+floor(nodesize/2)*1.5;
 % resultImage=img_color;
-% for k=1:size(xy,1)
-%     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'blue', 'LineWidth', nodesize);
+% 
+% for k=1:20%size(xy,1)
+%     resultImage = insertShape(resultImage, 'Line', xy(k,:), 'Color', 'green', 'LineWidth', nodesize+1);
 % end
 
 % figure(2); imshow(resultImage);
 
-% 检查深度图是否存在障碍，如果存在，则将障碍物添加进边界信息中。
 
 end
 
@@ -392,12 +404,36 @@ end
 out=right_stop;
 end
 
-%% 按行进行扫描
+%% 合并在一个平面上的行
 function out=m_line(a1,a2,b1,b2,t)
+if (a1==0) || (a2==0)
+    if b1==0 || b2==0 %缺失信息
+        out=1;
+    else % 平行于成像平面
+        a1=sqrt(2)/2;
+        a2=sqrt(2)/2;
+        b=normalize([b1,b2],'norm',2);
+        b1=b(1);
+        b2=b(2);
+        mLine=(a1*a2+b1*b2)/(sqrt(a1^2+b1^2)*sqrt(a2^2+b2^2))*0.5+0.5;
+        if mLine>=t
+            out=1;
+        else
+            out=0;
+        end
+    end
+else %一般情况
+    a=normalize([a1,a2],'norm',2);
+    b=normalize([b1,b2],'norm',2);
+    a1=a(1);
+    a2=a(2);
+    b1=b(1);
+    b2=b(2);
     mLine=(a1*a2+b1*b2)/(sqrt(a1^2+b1^2)*sqrt(a2^2+b2^2))*0.5+0.5;
     if mLine>=t
         out=1;
     else
         out=0;
     end
+end
 end

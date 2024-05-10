@@ -81,15 +81,15 @@ while(size(obj1.UserData,2)~=6) %没有收到指令
 end
 
 % 绘制阶跃响应曲线
-v=0;
-figure(3);
-plot(0, 0, '-o');  % Plot the initial state
-xlabel('Time');
-ylabel('Variable');
-title('Variable vs Time');
-grid on;
-hold on;
-t=0;
+% v=0;
+% figure(3);
+% plot(0, 0, '-o');  % Plot the initial state
+% xlabel('Time');
+% ylabel('Variable');
+% title('Variable vs Time');
+% grid on;
+% hold on;
+% t=0;
 
 while(1)
     time=tic;
@@ -179,9 +179,10 @@ while(1)
                 new_weigh=weigh/(weigh+weigh_last_time);
                 new_weigh_last_time=weigh_last_time/(weigh+weigh_last_time);
                 dir_this_time=dir1*new_weigh+dir2_last_time*new_weigh_last_time;
-                t=t+toc(time);
-                plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
-                drawnow;  % Force the plot to update
+                toc(time)
+%                 t=t+toc(time);
+%                 plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
+%                 drawnow;  % Force the plot to update
 
                 integrator=integrator+dir_this_time*0.1;
                 if integrator>v

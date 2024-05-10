@@ -11,23 +11,23 @@ end
 % color=imread("Resource\snapc30.png");%  % %
 % color=imread("Resource\curl.jpg");
 % color=imread("Resource\snapc2.png");
-% color=imread("Resource\road.jpg");
-color=imread("Resource\snapc25.png");
+color=imread("Resource\road.jpg");
+% color=imread("Resource\snapc25.png");
 color=imresize(color,[375,667]);
 %depthColor_c=fliplr(imcrop(color,[89 1 width_cd height_cd-1]));
 depthColor_c=imcrop(color,[89 1 width_cd height_cd-1]);
 
-depth=imread("Resource\snapd25.png");
-% depth=imread("Resource\snapd2.png");
-figure(3);imshow(depth)
+% depth=imread("Resource\snapd25.png");
+depth=imread("Resource\snapd2.png");
+% figure(3);imshow(depth)
 % depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
 depthColor_d=imcrop(depth,[1 8 width_cd height_cd-1]);
 figure(1);imshow(depthColor_c)
 figure(2);imshow(depthColor_d)
-figure(3);imshow(depth)
+% figure(3);imshow(depth)
 %% 输出邻域生长法的结果
 core=strel('disk',7);
-[edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c, depthColor_d,9,core,0.90);
+[edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c, depthColor_d,9,core,0.95);
 
 %% 输出去高光的结果
 imshow(depthColor_c)
@@ -121,3 +121,7 @@ figure(3);
 %hold on
 plot(xx-4.3,yy,'.');
 %figure(3);plot(xx,yy,'.');xlabel("时间");ylabel("预期两轮差速");
+
+%% 绘制Hough变换结果
+edge_img=u_edge(depthColor_c);
+laneLines=u_line_hough(depthColor_c, edge_img);

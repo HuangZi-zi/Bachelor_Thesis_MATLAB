@@ -17,7 +17,7 @@ resultImage = img;
 % xy = [lines(i).point1; lines(i).point2];
 % resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'green', 'LineWidth', 3);
 % end
-% figure();imshow(resultImage);title("检测到的所有直线");
+% figure();imshow(resultImage);%title("检测到的所有直线");
 
 % 读取直线信息
 for i = 1:length(lines)
@@ -135,7 +135,7 @@ else
     imshow(resultImage);
     % plot(xx,yy);
     % fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
-    title('直线检测结果');
+%     title('直线检测结果');
    
 end
 
