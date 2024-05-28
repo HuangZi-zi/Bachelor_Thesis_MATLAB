@@ -841,8 +841,8 @@ tic
 filted=medfilt2(img,[filter_size,filter_size]);%1次2维中值0.18264729s
 toc
 disp(['运行时间: ',num2str(toc)]);
-subplot 223;imshow(fil_xy_re);title("one-dimension mid-fil twice",'FontName','Times New Roman');
-subplot 224;imshow(filted);title("two-dimensions mid-fil once",'FontName','Times New Roman');
+subplot 223;imshow(fil_xy_re);title("one-dimension mean-fil twice",'FontName','Times New Roman');
+subplot 224;imshow(filted);title("two-dimensions mean-fil once",'FontName','Times New Roman');
 
 %% 对比sobel和canny算子
 img=imread("Resource\oldman1.jpg");
