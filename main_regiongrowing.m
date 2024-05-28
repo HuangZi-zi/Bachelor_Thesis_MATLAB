@@ -4,28 +4,16 @@ addpath('C:\Users\YawnFun\Documents\project\Kin2\Mex');
 clear
 close all
 
-% Create Kinect 2 object and initiqalize it
+% 初始化kinect相机
 k2 = Kin2('color','depth');
-% i=20;
+
 % 图像尺寸
 depth_width = 512; depth_height = 424; outOfRange = 4096;
 color_width = 1920; color_height = 1080;
 
-% Create matrices for the images
+% 新建存储图像的矩阵
 depth = zeros(depth_height,depth_width,'uint16');
 color = zeros(color_height,color_width,3,'uint8');
-
-
-% calib = k2.getDepthIntrinsics;
-% d_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
-%                          [calib.PrincipalPointX,calib.PrincipalPointY], ...
-%                          [depth_height,depth_width]);% 深度相机内参
-% k_int = [calib.RadialDistortionSecondOrder,calib.RadialDistortionFourthOrder,calib.RadialDistortionSixthOrder,0,0];
-% clear calib
-% calib = k2.getColorCalib;
-% c_int = cameraIntrinsics([calib.FocalLengthX,calib.FocalLengthY], ...
-%                          [calib.PrincipalPointX,calib.PrincipalPointY], ...
-%                          [color_height,color_width]);% 彩色相机内参
 
 % 接收读码器信号的端口
 clear obj1
@@ -74,25 +62,12 @@ integrator=0;
 % 语音提示
 [audio_stop,Fs]=audioread('Resource\blocked_by_barrier.mp3');
 
-
 % 在没有运行指令时停止等待
 while(size(obj1.UserData,2)~=6) %没有收到指令
     pause(0.1);%等待
 end
 
-% 绘制阶跃响应曲线
-% v=0;
-% figure(3);
-% plot(0, 0, '-o');  % Plot the initial state
-% xlabel('Time');
-% ylabel('Variable');
-% title('Variable vs Time');
-% grid on;
-% hold on;
-% t=0;
-
 while(1)
-    time=tic;
     % 检查命令
     if(size(obj1.UserData,2)==6)
         data=obj1.UserData;
@@ -138,25 +113,17 @@ while(1)
             % 读取新的图像
             validData = k2.updateData;
             if validData
-
-                % Copy data to Matlab matrices
                 depth = k2.getDepth;
                 color = k2.getColor;
-                %         [depth,~]=undistortImage(depth,d_int);
-                %         [color,~]=undistortImage(color,c_int);
-                color=imresize(color,[375,667]);
 
+                color=imresize(color,[375,667]);
                 depthColor_c=fliplr(imcrop(color,[89 1 width_cd-1 height_cd-1]));
                 depthColor_c=u_basic_process(depthColor_c,3,core);
                 depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
                 depthColor_d(depthColor_d>4096) = 4096;
-%                 depthColor_d=depthColor_d.*16;
                 depthColor_d=u_basic_process(depthColor_d,3,core);
-                %imshowpair(depthColor_d,depthColor_c);
-                
 
                 % 查找道路标线
-                
                 [edges,barrier,barrier_pos]=u_plane_regiongrowing(depthColor_c,depthColor_d,nodesize,core,0.9);
                 edges=(edges+edges_last_time)/2;% FIR滤波器平滑edges
                 if isempty(barrier)% 没有障碍物
@@ -173,16 +140,11 @@ while(1)
                     set(h1,'CData',out);drawnow;
                 end
                 edges_last_time=edges;% 更新上一次的边界值
-%                 figure(2);imshow(depthColor_d*16);
 
                 %控制器
                 new_weigh=weigh/(weigh+weigh_last_time);
                 new_weigh_last_time=weigh_last_time/(weigh+weigh_last_time);
                 dir_this_time=dir1*new_weigh+dir2_last_time*new_weigh_last_time;
-                toc(time)
-%                 t=t+toc(time);
-%                 plot(t, dir_this_time, '-o', 'MarkerFaceColor', 'b');  % Update the plot
-%                 drawnow;  % Force the plot to update
 
                 integrator=integrator+dir_this_time*0.1;
                 if integrator>v
@@ -191,27 +153,20 @@ while(1)
                     integrator=-v;
                 end
                 dv=fix(kp*dir_this_time+ki*integrator+kd*(dir_this_time-dir_last_time));
-%                  dv=fix(dir1);
-%                 dv=fix(kp*dir1+ki*integrator+kd*(dir1-dir_last_time)/time);
-%                 disp(dv);
+
                 dir_last_time=dir1;
                 dir2_last_time=dir2;
                 weigh_last_time=weigh;
                 
-%                 dv=fix(-dir*100);
-               sendcomm_run(obj2,v,dv)
-%                 disp(dir_this_time);
+                sendcomm_run(obj2,v,dv)
             end
         end
     else % 停止运行
         pause(0.1);
     end
-
-%toc
 end
 
-
-% Close kinect object
+% 关闭相机
 k2.delete;
 
 close all;
@@ -225,21 +180,8 @@ elseif dv<-1000
 end
 vl=v+dv+32768;
 vr=v-dv;
-
-% if dv>0
-%     vl=dv+32768;
-%     vr=dv+32768;
-% else
-%     vl=-dv;
-%     vr=-dv;
-% end
-% 前进为左边反转，右边正转
-% fprintf("left:%d; right:%d\n",vl,vr)
-% fprintf("dv:%d\n",dv)
-%     fprintf("v:%d \n",v)
 vlhex=dec2hex(vl,4);
 vrhex=dec2hex(vr,4);
-% fprintf("left:%s; right:%s\n",vlhex,vrhex)
 
 vlh= vlhex(1:2) ;%高位
 vll=vlhex(3:4);%低位
@@ -253,12 +195,6 @@ sendbuff(2)= 170;
 sendbuff(3)= 113;
 sendbuff(4)= 4;
 sendbuff(5)= 16;
-
-%             sendbuff(1)= hex2dec('55');
-%             sendbuff(2)= hex2dec('aa');
-%             sendbuff(3)= hex2dec('71');
-%             sendbuff(4)= hex2dec('04');
-%             sendbuff(5)= hex2dec('10');
 sendbuff(6)= hex2dec(vlh);
 sendbuff(7)= hex2dec(vll);
 sendbuff(8)= hex2dec(vrh);
@@ -266,8 +202,7 @@ sendbuff(9)= hex2dec(vrl);
 %校验和
 %校验位=前面所有数据之和，取最后两位
 add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
-two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
-% two_bits_h= dec2hex(two_bits_d);% 发送数据以10进制存储，因此不需转换
+two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位，发送数据以10进制存储，因此不需转换
 sendbuff(10)= two_bits_d;
 write(port,sendbuff,"uint8");
 end
@@ -290,17 +225,17 @@ end
 
 %% 旋转函数
 function sendcomm_spin(port,dir,time)
-%    01，左转（地面
-%    02，右转（地面
+% 01，左转
+% 02，右转
 v=200;
 vl=v+32768*(dir-1);
 vr=v+32768*(dir-1);
 vlhex=dec2hex(vl,4);
 vrhex=dec2hex(vr,4);
-vlg= vlhex(1:2) ;%高位
-vld=vlhex(3:4);%低位
-vrg= vrhex(1:2) ;%高位
-vrd=vrhex(3:4) ;%低位
+vlh= vlhex(1:2) ;%高位
+vll=vlhex(3:4);%低位
+vrh= vrhex(1:2) ;%高位
+vrl=vrhex(3:4) ;%低位
 
 sendbuff=zeros(1,9);
 sendbuff(1)= hex2dec('55');
@@ -308,17 +243,16 @@ sendbuff(2)= hex2dec('aa');
 sendbuff(3)= hex2dec('71');
 sendbuff(4)= hex2dec('04');
 sendbuff(5)= hex2dec('10');
-sendbuff(6)= hex2dec(vlg);
-sendbuff(7)= hex2dec(vld);
-sendbuff(8)= hex2dec(vrg);
-sendbuff(9)= hex2dec(vrd);
+sendbuff(6)= hex2dec(vlh);
+sendbuff(7)= hex2dec(vll);
+sendbuff(8)= hex2dec(vrh);
+sendbuff(9)= hex2dec(vrl);
 %校验和
 %校验位=前面所有数据之和，取最后两位
 add=sum(sendbuff,[1 2 3 4 5 6 7 8 9]);
 two_bits_d=rem(add,256);%10进制下对256取余，在16进制下为2位
 sendbuff(10)= two_bits_d;
 write(port,sendbuff,"uint8");
-
 pause(time/10);
 
 % 停止机器人

@@ -125,3 +125,77 @@ plot(xx-4.3,yy,'.');
 %% 绘制Hough变换结果
 edge_img=u_edge(depthColor_c);
 laneLines=u_line_hough(depthColor_c, edge_img);
+
+%% 对比一次二维中值和两次一维中值
+img=imread("Resource\oldman1.jpg");
+img=im2gray(img);
+subplot 221;imshow(img);title("origin",'FontName','Times New Roman');
+img=imnoise(img,'gaussian',0.002);
+img=imnoise(img,'salt & pepper',0.02);
+img=im2double(img);
+h=480;
+w=640;
+
+subplot 222;imshow(img);title("added noise",'FontName','Times New Roman');
+% 中值滤波
+filter_size=5;
+% hist_eq_double = im2double(hist_eq);
+% x_dir=hist_eq_double(:)';
+% tic;
+x_dir=img(:)';
+fil_x=medfilt1(x_dir,filter_size);
+fil_x_re=reshape(fil_x,h,w)';
+y_dir=fil_x_re(:)';
+fil_xy=medfilt1(y_dir,filter_size);%2次1维中值0.03024628s
+fil_xy_re=reshape(fil_xy,w,h)';
+% toc;
+% disp(['运行时间: ',num2str(toc)]);
+tic
+filted=medfilt2(img,[filter_size,filter_size]);%1次2维中值0.18264729s
+toc
+disp(['运行时间: ',num2str(toc)]);
+subplot 223;imshow(fil_xy_re);title("one-dimension mean-fil twice",'FontName','Times New Roman');
+subplot 224;imshow(filted);title("two-dimensions mean-fil once",'FontName','Times New Roman');
+
+%% 对比sobel和canny算子
+img=imread("Resource\oldman1.jpg");
+img=im2gray(img);
+% subplot 221;imshow(img);title("origin");
+img=imnoise(img,'gaussian',0.002);
+img=imnoise(img,'salt & pepper',0.02);
+img=im2double(img);
+h=480;
+w=640;
+
+subplot 221;imshow(img);title("added noise",'FontName','Times New Roman');
+% 中值滤波
+filter_size=5;
+% hist_eq_double = im2double(hist_eq);
+% x_dir=hist_eq_double(:)';
+% tic;
+x_dir=img(:)';
+fil_x=medfilt1(x_dir,filter_size);
+fil_x_re=reshape(fil_x,h,w)';
+y_dir=fil_x_re(:)';
+fil_xy=medfilt1(y_dir,filter_size);%2次1维中值0.03024628s
+fil_xy_re=reshape(fil_xy,w,h)';
+subplot 222;imshow(fil_xy_re);title("filtered",'FontName','Times New Roman');
+
+edgesobel = edge(fil_xy_re, 'sobel');
+edgecanny = edge(fil_xy_re, "canny");
+subplot 223;imshow(edgesobel);title("edge-Sobel",'FontName','Times New Roman');
+subplot 224;imshow(edgecanny);title("edge-Canny",'FontName','Times New Roman');
+
+%% 曲线测试情况
+img=imread("Resource\snapc25.png");
+% edge_img=u_edge(img);
+% u_line_hough(img,edge_img);
+u_plane_regiongrowing(img,img);
+
+%% 人工势场法
+img=imread("Resource\snapc30.png");
+core=strel('disk',7);
+edges=u_plane_regiongrowing(img,img,9,core);
+[out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges);
+imshow(out);
+disp(dir);

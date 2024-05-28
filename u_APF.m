@@ -24,7 +24,7 @@ deltaY=zeros(n+1,1);
 r=zeros(n+1,1);
 Frex=zeros(n+1,1);
 Frey=zeros(n+1,1);
-%***************初始化结束，开始主体循环******************
+
 for j=1:J %循环开始
     goal(j,1)=XXX(1); %Goal是保存车走过的每个点的坐标。刚开始先将起点放进该向量。
     goal(j,2)=XXX(2);
@@ -68,12 +68,8 @@ weigh=2^(-sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2));
 goal(K,1)=Xsum(1,1);%把路径向量的最后一个点赋值为目标
 goal(K,2)=Xsum(1,2);
 
-%***********************************画出障碍，起点，目标，路径点*************************
-% figure(3);imshow(img);
-% hold on;
+
 % 路径
-% X=goal(1:10:end,1);
-% Y=goal(1:10:end,2);
 X=goal(:,1);
 Y=goal(:,2);
 
@@ -88,12 +84,9 @@ out=insertShape(out,"filled-circle",[Xo,8],"Color","blue");% 起点
 
 line1=abs(Y-(h-nodesize));
 [~, index1] = min(line1(:));
-% dir_this_time=2*v./(1+exp(-(1/v*10)*(X(index1)-w/2)))-v;
 dir_this_time=200./(1+exp(-(1/50)*(X(index1)-w/2)))-100;
-% disp(X(index1));
 line2=abs(Y-(h-2*nodesize));
 [~, index2] = min(line2(:));
-
 dir_next_time=200./(1+exp(-(1/50)*(X(index2)-X(index1))))-100;
 
 end

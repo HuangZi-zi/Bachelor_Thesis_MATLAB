@@ -1,23 +1,14 @@
 function laneLines = u_line_hough(img, edge)
-tic
-% Perform Hough Transform to detect lines in the Canny image
+resultImage=img;
+% 进行hough变换
 [H, theta, rho] = hough(edge);
 
-% Set thresholds for line detection
+% 设置阈值
 threshold = 0.2 * max(H(:));
 P = houghpeaks(H, 10, 'Threshold', threshold);
 
-% Extract lines from Hough Transform results
+% 提取Hough变换得到的直线
 lines = houghlines(edge, theta, rho, P, 'FillGap', 20, 'MinLength', 40);
-toc
-disp(['运行时间: ',num2str(toc)]);
-% 绘制所有直线
-resultImage = img;
-% for i = 1:length(lines)
-% xy = [lines(i).point1; lines(i).point2];
-% resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'green', 'LineWidth', 3);
-% end
-% figure();imshow(resultImage);%title("检测到的所有直线");
 
 % 读取直线信息
 for i = 1:length(lines)
@@ -28,28 +19,25 @@ for i = 1:length(lines)
     linesinfo(i)=lineinfo;
 end
 
-% Define parameters for line merging (adjust as needed)
-aThreshold = 0.15; % Maximum slope difference for merging line segments
-bThreshold = 50;    % Maximum intercept difference for merging line segments
+% 直线合并的阈值
+aThreshold = 0.15;
+bThreshold = 50;
 
-% Initialize an empty list to store merged lines
 mergedLines = [];
 
-% Iterate through each line segment
+% 遍历每个直线段
 for i = 1:length(linesinfo)
     currentLine = linesinfo(i);
 
-    % Check if the current line has been merged
+    % 检查是否合并过
     if ~currentLine.Merged
-        % Create a new group for merging
         mergeGroup = [currentLine];
         currentLine.Merged = true;
 
-        % Iterate through remaining lines to find merge candidates
         for j = i+1:length(lines)
             candidateLine = linesinfo(j);
 
-            % Check if the candidate line has not been merged and meets merging criteria
+            % 检查是否合并过、是否可合并
             if ~candidateLine.Merged && ...
                     isMergeCandidate(currentLine, candidateLine, aThreshold, bThreshold)
                 mergeGroup = [mergeGroup, candidateLine];
@@ -57,19 +45,11 @@ for i = 1:length(linesinfo)
             end
         end
 
-        % Merge the lines in the group and store the merged line
+        % 合并直线
         mergedLine = mergeLineSegments(mergeGroup);
         mergedLines = [mergedLines; mergedLine];
     end
 end
-
-% 绘制合并后所有直线
-%     resultImage = img;
-% for i = 1:length(mergedLines)
-% xy = [mergedLines(i).point1; mergedLines(i).point2];
-% resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'red', 'LineWidth', 1);
-% end
-% figure();imshow(resultImage);title("合并后的所有直线");
 
 % 区分左侧和右侧的线段
 leftLaneLines = [];
@@ -128,21 +108,15 @@ else
     xy = [rightLaneLines(sorted_R(1)).point1; rightLaneLines(sorted_R(1)).point2];
     resultImage = insertShape(resultImage, 'Line', xy, 'Color', 'cyan', 'LineWidth', 5);
 
-    
-    % xx=0:1000;
-    % yy=leftLaneLines(sorted_L(1)).a * xx+ leftLaneLines(sorted_L(1)).b;
     figure;
     imshow(resultImage);
-    % plot(xx,yy);
-    % fprintf("slope of the two lines: %f\t%f\n",leftLaneLines(sorted_L(1)).a,rightLaneLines(sorted_R(1)).a);
-%     title('直线检测结果');
    
 end
 
 
 end
 
-%% Function to check if two line segments can be merged
+%% 判断是否可合并的子程序
 function isMergeable = isMergeCandidate(line1, line2, aThreshold, bThreshold)
 % y=ax+b
 isMergeable=false;
@@ -152,7 +126,7 @@ if abs(line1.a-line2.a)<aThreshold && abs(line1.b-line2.b)<bThreshold
 end
 end
 
-%% Function to merge a group of line segments into a single line
+%% 合并直线段的子程序
 function mergedLine = mergeLineSegments(lineGroup)
 % lineinfo=struct('a', a, 'b', b, 'point1', lines(i).point1, 'point2', lines(i).point2, 'Merged',false);
 suma=0;
@@ -171,8 +145,4 @@ end
 pointa=points(sorted(1)).p;
 pointb=points(sorted(2*l)).p;
 mergedLine=struct('a', suma/l, 'b', sumb/l, 'point1', pointa, 'point2', pointb, 'Merged',false);
-
-
 end
-
-
