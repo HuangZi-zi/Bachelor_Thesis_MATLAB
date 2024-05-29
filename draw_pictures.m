@@ -11,14 +11,14 @@ end
 % color=imread("Resource\snapc30.png");%  % %
 % color=imread("Resource\curl.jpg");
 % color=imread("Resource\snapc2.png");
-color=imread("Resource\road.jpg");
-% color=imread("Resource\snapc25.png");
+% color=imread("Resource\road.jpg");
+color=imread("Resource\snapc25.png");
 color=imresize(color,[375,667]);
 %depthColor_c=fliplr(imcrop(color,[89 1 width_cd height_cd-1]));
 depthColor_c=imcrop(color,[89 1 width_cd height_cd-1]);
 
-% depth=imread("Resource\snapd25.png");
-depth=imread("Resource\snapd2.png");
+depth=imread("Resource\snapd25.png");
+% depth=imread("Resource\snapd2.png");
 % figure(3);imshow(depth)
 % depthColor_d=fliplr(imcrop(depth,[1 8 width_cd-1 height_cd-1]));
 depthColor_d=imcrop(depth,[1 8 width_cd height_cd-1]);
@@ -102,24 +102,23 @@ imshow(out)
 % %quiver(X(1:4:end),Y(1:4:end),Fsumx(1:4:end),Fsumy(1:4:end),'g',LineWidth=1);
 
 %% 绘制阶跃响应
-open('Resource/corrected.fig');%为文件名
+%open('Resource/step_response_simu.fig');%近似系统
+%open('Resource/step_response2.fig');%初始响应
+open('Resource/comparison of correction.fig');%校正后
+
 handle = findobj(gca,'Type','line');%获取曲线的handle，如果图中有多条曲线，handle为一个数组
 xdata = get(handle,'XData');
 ydata = get(handle,'YData');
-%%xlswrite('xdata.xlsx',xdata); %%我试过了这两行代码，保存下来的是空的xlsx文件，因此未采用
-%%xlswrite('ydata.xlsx',ydata);
 % figure(1);hold on
 % plot(xdata,ydata)
 xx=cell2mat(xdata(1:156)');
 xx=xx-xx(end);
 yy=cell2mat(ydata(1:156)');
-temp=yy(1:85);
-temp(temp(:)<-0.1)=temp(temp(:)<-0.1)+0.1;
-temp=medfilt1(temp,8);
-yy(1:85)=temp;
 figure(3);
 %hold on
-plot(xx-4.3,yy,'.');
+plot(xx,yy,'.');
+xlabel("time/s",'FontName','Times New Roman')
+ylabel("error/pixels",'FontName','Times New Roman')
 %figure(3);plot(xx,yy,'.');xlabel("时间");ylabel("预期两轮差速");
 
 %% 绘制Hough变换结果
@@ -199,3 +198,4 @@ edges=u_plane_regiongrowing(img,img,9,core);
 [out,dir_this_time,dir_next_time,weigh]=u_APF(img,edges);
 imshow(out);
 disp(dir);
+

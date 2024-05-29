@@ -8,21 +8,19 @@ div=1;
 [h,w,channel]=size(img);
 
 if channel == 3 && div == 1
-    % Split the image into three color channels (Red, Green, Blue)
+    % 将图像拆分成三个通道 (Red, Green, Blue)
     redChannel = img(:, :, 1);
     greenChannel = img(:, :, 2);
     blueChannel = img(:, :, 3);
     edgeRed = edge(redChannel, 'sobel');
     edgeGreen = edge(greenChannel, 'sobel');
     edgeBlue = edge(blueChannel, 'sobel');
-    % Combine the three edge images into a single image
+    % 重新组合三个通道
     edgeImage = double(edgeRed+edgeGreen+edgeBlue);
     edgeImage = imbinarize(edgeImage,0.9);
-
 elseif channel==3 && div==0
     gray=im2gray(img);
     edgeImage = edge(gray, 'sobel');
-
 else
     edgeImage = edge(img, 'sobel');
 end

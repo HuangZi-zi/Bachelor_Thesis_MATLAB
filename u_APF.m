@@ -33,7 +33,7 @@ for j=1:J %循环开始
          deltaY(i)=Xsum(i,2)-XXX(2);
          r(i)=sqrt(deltaX(i)^2+deltaY(i)^2);
     end
-    %Rgoal=sqrt((XXX(1)-Xsum(1,1))^2+(XXX(2)-Xsum(1,2))^2);   %路径点和目标的距离
+
     %目标点对路径点的引力
     Fatx=k*deltaX(1);
     Faty=k*deltaY(1);
